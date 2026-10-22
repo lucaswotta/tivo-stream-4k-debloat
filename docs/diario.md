@@ -239,3 +239,25 @@ Mesmo limite de antes: a coluna da esquerda foi medida logo após o boot e a da 
 - O `dumpsys accessibility` lista um serviço por linha: os scripts liam só a primeira e davam "serviço não ligou" com os dois ligados. Corrigido.
 - Teste com os botões reais: Guide abriu as Configurações, TiVo o YouTube, Live o UniTV; Home voltou ao launcher depois de cada um; sem crash.
 - **Aberto:** Downloader; protetor de tela; ajuste fino do tema (movimento reduzido, papel de parede).
+
+## 2026-10-22 — Protetor de tela, launcher velho suspenso e segunda leva
+
+- **Protetor de tela:** `screensaver_components` e `screensaver_default_component` passaram para `com.gathin.tvhome/.ClockDream` (o serviço aparece em `query-services` do `DreamService`). Esta build não tem `cmd dream`, então não houve prévia por ADB: teste em Configurações > Preferências do dispositivo > Protetor de tela. `backdrop` suspenso; `home_idle_clock_minutes` saiu do tema por redundância.
+- **Launcher velho:** `pm suspend` do `tvlauncher` foi recusado enquanto ele era o dono do papel HOME (`suspended=false`, sem erro). Com `set-home-activity com.android.tv.settings/.system.FallbackHome` o papel passou às Configurações e o `suspend` funcionou. Reboot: o launcher novo já estava em foco 15 s depois do `boot_completed`, sem aviso de app suspenso na tela (captura), papel HOME persistiu nas Configurações.
+- Suspensos também: `backdrop`, `camera2`, `gallery3d` e `katniss`. Suspender não impede o boot de religar processos: depois do reboot ainda rodavam `tvlauncher`, `katniss:interactor`, `coreservice` e `sageservice`. `post-boot.sh` agora cobre `tvlauncher` e `katniss`.
+- **`katniss`:** mesmo com `force-stop` o `katniss:interactor` voltava, porque é o serviço de voz registrado (`assistant`, `voice_interaction_service`). Limpando os dois settings, ele não voltou. Originais em `runs/2026-10-22_assistente-original.txt` (ignorado pelo git) e na lista. Efeito: o botão do assistente e a busca por voz não funcionam.
+- **`mediashell`** (Chromecast) foi suspenso e depois reativado: continuava com processo vivo por uma conexão de outro componente (`LocalGrpcAuthService`), então suspender só quebrava o cast sem economizar memória.
+- Por que o Downloader é removido: origem, gatilho e limites documentados em [03](03-coreservice.md).
+
+Medição (sem reboot, depois de `post-boot.sh`, 3 rodadas de `bench.sh`, mediana):
+
+| Métrica | cleanyourtv (antes) | + launcher velho e `katniss` parados |
+|---|---|---|
+| `MemAvailable` | 1060 MB | 1151 MB |
+| PSS do launcher | 21 MB | 22 MB |
+| Processos | 317 | 316 |
+| YouTube a frio | 526 ms | 545 ms |
+| Netflix a frio | 511 ms | 653 ms |
+| Prime a frio | 655 ms | 655 ms |
+
+A abertura da Netflix variou entre as medições (511 e 653 ms) sem que nada nela tenha mudado: tratar como ruído, não como regressão. O ganho firme continua sendo de memória.

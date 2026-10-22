@@ -34,6 +34,15 @@ Consequências medidas em 2026-10-22:
 - **Um app que não declara HOME é ignorado.** O `homelite` sem a categoria sobreviveu a um boot completo com o `coreservice` rodando, com 0 chamadas de `uninstallAsUser` para ele.
 - Um serviço de acessibilidade abre o launcher pela tecla Home (ver [05](05-launcher.md)); por isso o launcher não precisa da categoria.
 
+### Origem da lista e por que ela roda
+
+- **Onde está:** no recurso `array/evo_black_list_to_uninstall_pkgs` (id `0x7f030009`) dentro de `resources.arsc` do `Nes_CoreService_Newest.apk` (`/system/app`, somente leitura). Os nomes não aparecem no código (`.dex`); o código chama a função `EvoBlackListAppsFun`. Há outros dois arrays no mesmo APK, `clear_data_black_list` e `clear_data_white_list`, que dizem de quais apps o `daemon` limpa os dados (entre eles Play Store e YouTube; a lista de "limpar" é outra coisa que a de "desinstalar").
+- **Quando roda:** a cada início do `coreservice`, antes de qualquer app terminar de abrir. No boot de 2026-10-22 18:40 a função enumerou só launchers de sistema (`tvlauncher`, Configurações) e **mesmo assim** chamou `uninstallAsUser` para os 53 nomes: não depende de haver launcher alternativo instalado. Repete a enumeração em eventos seguintes (18:40:20 e 18:40:31).
+- **Quem acorda o `coreservice`:** o log mostra `Start proc ... com.nes.coreservice for broadcast {BootReceiver}`, 4 s depois de `com.nes.daemon` subir. O `daemon` é `PERSISTENT` (o Android o recria se for morto) e o broadcast chega mesmo com o `coreservice` suspenso e em estado parado.
+- **Por quê:** o APK não diz. A composição da lista (launchers alternativos, ferramentas de instalação e de ADB como Downloader e Magisk, mais de vinte variantes de apps de IPTV "Magis TV") sugere política do fabricante contra sideload e IPTV pirata, e coincide com os relatos da AFTVnews de que a atualização para o Android 12 passou a apagar o Downloader. É uma inferência, não um fato documentado.
+- **O que não funciona:** suspender, `appops`, `force-stop` (o processo volta no boot), e componentes e `pm disable*` (recusados ao shell). **Não testado:** sobreposição de recurso (RRO) para esvaziar o array, que em geral exige que o app alvo permita ou que o overlay seja do sistema.
+- **O que funciona:** o Downloader instalado **depois** do boot, com o `coreservice` parado por `scripts/post-boot.sh`, fica até o próximo boot. Um reboot, mesmo o de uma queda de energia, o remove. Alternativas fora da lista: `scripts/install-apk.sh` a partir do PC, ou Send Files To TV e FX Explorer na própria TV.
+
 ### A lista fixa de 53 pacotes
 
 No boot, `EvoBlackListAppsFun` chama `uninstallAsUser` para 53 nomes de pacote, instalados ou não (registro do log de 2026-10-22). Grupos:
