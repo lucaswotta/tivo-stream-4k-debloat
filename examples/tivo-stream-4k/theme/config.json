@@ -15,5 +15,6 @@
   "tile_menu": true,
   "reduced_motion": true,
   "animations": false,
-  "focus_overshoot": false
+  "focus_overshoot": false,
+  "dock_title": false
 }

@@ -21,10 +21,11 @@ O protótipo próprio (`dev.lucaswotta.homelite`) foi removido do aparelho; do c
 | Patch | O que muda |
 |---|---|
 | `home-category.patch` | tira a categoria HOME do `MainActivity` (o `coreservice` apaga apps não-sistema que a declaram) |
+| `no-app-name.patch` | o rótulo com o nome do app embaixo do tile nunca aparece (aplica depois do `instant-focus-zoom`, que altera linhas vizinhas do mesmo arquivo) |
 | `no-focus-highlight.patch` | `GlassView` (o destaque em vidro que acompanha o foco) deixa de desenhar: sem borda branca, sem os 12 anéis de brilho e sem o brilho do vidro; também deixa de pedir uma camada de hardware para ele |
 | `instant-focus-zoom.patch` | com `animations: false` o app selecionado ainda cresce 10%, mas na hora (o código original zerava o zoom junto com as animações); o contorno do destaque acompanha o tamanho |
 
-Tema de movimento (`examples/tivo-stream-4k/theme/config.json`): `reduced_motion: true`, `animations: false`, `focus_overshoot: false`. O foco muda de botão sem deslizar e sem mola, e o app selecionado só cresce 10%, sem borda nem brilho. Medições dos custos de cada opção em [diário](diario.md).
+Tema de movimento (`examples/tivo-stream-4k/theme/config.json`): `reduced_motion: true`, `animations: false`, `focus_overshoot: false`, `dock_title: false` (sem o nome grande acima do dock). O foco muda de botão sem deslizar e sem mola, e o app selecionado só cresce 10%, sem borda nem brilho. Medições dos custos de cada opção em [diário](diario.md).
 
 ## Como a tecla Home chega ao launcher
 

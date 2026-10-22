@@ -1,0 +1,13 @@
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java b/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java
+--- a/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java
++++ b/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java
+@@ -425,7 +425,8 @@
+         h.card.setFocusable(true);
+         h.name.setText(e.name);
+         // The dock has no labels, unless always_show_names asks for them (DockDecoration then makes room in the band).
+-        h.name.setVisibility(dockRow && position < dockSize && restNameAlpha == 0f ? View.INVISIBLE : View.VISIBLE);
++        // TiVo Stream 4K: app names are never shown under the tiles (the focused tile's zoom shows the selection).
++        h.name.setVisibility(View.INVISIBLE);
+         boolean focused = h.card.isFocused();   // a rebind after reload() can hit the focused tile
+         h.name.setAlpha(focused ? 1f : restNameAlpha);
+         h.card.setScaleX(focused ? focusScale() : 1f);

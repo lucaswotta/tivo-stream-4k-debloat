@@ -343,3 +343,11 @@ Primeira tentativa inválida: o `push-theme.sh` falhou nas três variantes por f
 - `launcher/no-focus-glow.patch` (só os anéis de brilho) foi substituído por `launcher/no-focus-highlight.patch`: `GlassView.onDraw` não desenha nada (borda, anéis e brilho do vidro) e o construtor não pede mais a camada de hardware. A posição do destaque ainda é calculada, sem custo visível.
 - Captura depois de instalar: a Play Store, selecionada na segunda linha, está maior que os vizinhos, sem borda, halo nem brilho; o nome aparece embaixo. Sem crash (buffer `crash` vazio).
 - **Ainda visíveis, não removidos por não estarem no pedido:** o nome do app em foco e o brilho colorido do fundo, que muda de cor com o app (`ambient_glow`, desligável no tema). Não medi quadros depois deste patch.
+
+## 2026-10-22 — Nomes dos apps removidos
+
+- Pedido do dono: remover também o nome do app selecionado.
+- Dois nomes: o título grande acima do dock (`dock_title: false` no tema) e o rótulo embaixo dos tiles da grade (`launcher/no-app-name.patch`, que força `INVISIBLE`).
+- Primeiro build falhou (`exit=1`): o patch novo foi gerado contra o arquivo original e conflitava com o `instant-focus-zoom.patch`, que altera linhas vizinhas de `AppAdapter.java`. Refeito em cima do estado já com o zoom (`diff -u` entre o arquivo depois do zoom e depois da edição); `git apply --check` isolado dá "conflito" porque ele depende do zoom, e o build, que aplica na ordem alfabética, passou.
+- Capturas depois de instalar: foco no dock (YouTube) e na grade (Play Store): o app selecionado só fica maior, sem título, rótulo, borda ou halo. O brilho colorido do fundo continua (`ambient_glow`).
+- Durante o teste, o dono estava usando a TV: duas setas injetadas por mim caíram no app Send Files To TV, que ele tinha aberto, e só moveram o foco dentro dele.
