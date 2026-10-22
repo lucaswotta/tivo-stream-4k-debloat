@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="dev.lucaswotta.bootclean"
+    android:versionCode="1"
+    android:versionName="0.1">
+
+    <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="31" />
+
+    <!-- INTERNET only to reach the TV's own adbd on 127.0.0.1:5555; Adb.java opens no other address. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application
+        android:label="Boot Clean"
+        android:allowBackup="false"
+        android:hasCode="true">
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <!-- scripts/install-launcher.sh sends this once to unstop the app and show the ADB prompt. -->
+                <action android:name="dev.lucaswotta.bootclean.RUN" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name=".CleanJob"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+    </application>
+</manifest>

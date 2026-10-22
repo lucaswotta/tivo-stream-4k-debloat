@@ -24,13 +24,13 @@ drop_services() {   # removes every given service from enabled_accessibility_ser
 
 if [[ "${1:-}" == "--remove" ]]; then
   drop_services "$SERVICE" "$LAUNCHER/.HomeKeyService" "$OLD_PKG/.HomeKeyService"
-  for p in "$KEY_PKG" "$LAUNCHER" "$OLD_PKG"; do sh_tv pm uninstall "$p" >/dev/null 2>&1 || true; done
+  for p in "$KEY_PKG" "$LAUNCHER" "$OLD_PKG" dev.lucaswotta.bootclean; do sh_tv pm uninstall "$p" >/dev/null 2>&1 || true; done
   sh_tv am start -a android.intent.action.MAIN -c android.intent.category.HOME >/dev/null
   echo "Removido. Home: $(sh_tv cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME | tail -1)"
   exit 0
 fi
 
-for apk in launcher/cleanyourtv.apk homekey/homekey.apk; do
+for apk in launcher/cleanyourtv.apk homekey/homekey.apk bootclean/bootclean.apk; do
   [[ -f "$ROOT/$apk" ]] || { echo "falta $apk: rode scripts/build-launcher.sh" >&2; exit 1; }
 done
 
@@ -38,13 +38,20 @@ drop_services "$OLD_PKG/.HomeKeyService"
 sh_tv pm uninstall "$OLD_PKG" >/dev/null 2>&1 || true
 adb -s "$TARGET" install -r "$ROOT/launcher/cleanyourtv.apk" </dev/null
 adb -s "$TARGET" install -r "$ROOT/homekey/homekey.apk" </dev/null
+adb -s "$TARGET" install -r "$ROOT/bootclean/bootclean.apk" </dev/null
 
 enable_services "$SERVICE" "$LAUNCHER/.HomeKeyService"
 
+bound_ok=""
 for _ in 1 2 3 4 5; do
   sleep 2
   # dumpsys prints one bound service per line, so read the first two.
-  sh_tv dumpsys accessibility | grep -A1 "Bound services" | grep -q "Home Key" && { echo "Serviço ativo."; exit 0; }
+  if sh_tv dumpsys accessibility | grep -A1 "Bound services" | grep -q "Home Key"; then bound_ok=1; break; fi
 done
-echo "O serviço não ligou. Confira Configurações > Acessibilidade." >&2
-exit 1
+[[ -n "$bound_ok" ]] || { echo "O serviço não ligou. Confira Configurações > Acessibilidade." >&2; exit 1; }
+echo "Serviço ativo."
+
+# bootclean stops the processes the system restarts at every boot. Its first run asks the TV for ADB
+# permission: accept with "Sempre permitir" (the screensaver must not be on, or the prompt is denied).
+sh_tv am broadcast -n dev.lucaswotta.bootclean/.BootReceiver -a dev.lucaswotta.bootclean.RUN >/dev/null
+echo "Olhe a TV: aceite o aviso de depuração USB do bootclean com 'Sempre permitir'."

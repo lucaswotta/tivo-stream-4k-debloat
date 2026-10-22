@@ -4,7 +4,7 @@
 # Needs JDK 17 and the Android SDK in ~/.local/share/tivo-toolchain; Gradle and the AndroidX
 # libraries are downloaded by the project's own Gradle wrapper on the first run.
 #
-# Uso: scripts/build-launcher.sh      -> launcher/cleanyourtv.apk e homekey/homekey.apk
+# Uso: scripts/build-launcher.sh      -> launcher/cleanyourtv.apk, homekey/homekey.apk e bootclean/bootclean.apk
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -32,3 +32,4 @@ cp app/build/outputs/apk/release/app-release.apk "$ROOT/launcher/cleanyourtv.apk
 ls -l "$ROOT/launcher/cleanyourtv.apk"
 
 "$ROOT/scripts/build-apk.sh" homekey | tail -1
+"$ROOT/scripts/build-apk.sh" bootclean | tail -1

@@ -9,3 +9,7 @@ homekey/*.apk
 launcher/*.apk
 homekey/*.idsig
 launcher/*.idsig
+bootclean/build/
+bootclean/*.jks
+bootclean/*.apk
+bootclean/*.idsig
