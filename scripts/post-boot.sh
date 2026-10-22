@@ -8,9 +8,11 @@ source "$(dirname "$0")/_lib.sh"
 connect
 
 # Suspended packages still get their boot broadcasts and bindings, so these come back at every boot:
-# the NES core and TiVo services, the stock launcher and Assistant. com.google.android.tvrecommendations is left out: something else
+# the NES core and TiVo services, the stock launcher, Assistant and recommendations. For the last one the
+# notification listener must be off too: cmd notification disallow_listener
+# com.google.android.tvrecommendations/com.google.android.tvrecommendations.NotificationsService com.google.android.tvrecommendations is left out: something else
 # binds it and the system restarts it within a second of a force-stop.
-STOP=(com.nes.coreservice com.tivo.sageservice com.google.android.tvlauncher com.google.android.katniss)
+STOP=(com.nes.coreservice com.tivo.sageservice com.google.android.tvlauncher com.google.android.katniss com.google.android.tvrecommendations)
 
 for p in "${STOP[@]}"; do sh_tv am force-stop "$p"; done
 sleep 3

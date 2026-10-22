@@ -283,3 +283,10 @@ A abertura da Netflix variou entre as medições (511 e 653 ms) sem que nada nel
 - `packages_enabled` passou de 102 para 103 só porque o `bootclean` entrou.
 - **Efeitos que não tinha antes:** a TV agora mantém uma chave ADB autorizada para um app, e o `tvrecommendations` continua religado (algo o prende; 34 MB de PSS).
 - **Aberto:** o `scripts/post-boot.sh` virou reserva para quem não instalar o `bootclean`. O Downloader segue fora (lista do `coreservice`).
+
+## 2026-10-22 — O que mantinha o `tvrecommendations` vivo
+
+- `Start proc ... for service {NotificationsService}`: o processo sobe como `NotificationListenerService`, que o sistema mantém ligado por estar em `enabled_notification_listeners` (era o único). `dumpsys activity services` mostrou a conexão `CR FGS` do sistema com ele; por isso o `force-stop` não adiantava.
+- `cmd notification disallow_listener com.google.android.tvrecommendations/com.google.android.tvrecommendations.NotificationsService`: o processo caiu e não voltou. Valor original em `runs/2026-10-22_ouvintes-original.txt` e em [10](10-bootclean.md).
+- Depois de um reboot a lista seguiu vazia (persistiu), mas o processo voltou, agora `for content provider {NotificationContentProvider}`. Incluído nos `force-stop` do `bootclean` e do `post-boot.sh`.
+- Verificado: depois de uma execução do `bootclean`, `coreservice`, `sageservice`, `tvlauncher`, `katniss` e `tvrecommendations` sem processo, e nenhum voltou em 90 s. Não repeti o ciclo completo de reboot para esta inclusão (o mecanismo é o mesmo já testado). `MemAvailable` medido logo depois: 1000 MB, 2 minutos depois de um boot, sem assentar; o ganho real desse processo (34 MB de PSS) ficou dentro do ruído da medição (+9 MB).
