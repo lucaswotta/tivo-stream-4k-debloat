@@ -19,7 +19,8 @@ connect() {
   fi
 }
 
-sh_tv() { adb -s "$TARGET" shell "$@" | tr -d '\r'; }
+# </dev/null: adb shell otherwise reads the stdin of the caller's `while read` loop and ends it after one item.
+sh_tv() { adb -s "$TARGET" shell "$@" </dev/null | tr -d '\r'; }
 
 stamp() { date +%Y-%m-%d_%H%M; }
 
