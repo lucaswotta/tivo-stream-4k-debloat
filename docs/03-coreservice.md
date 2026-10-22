@@ -14,6 +14,17 @@ Fontes: [AFTVnews](https://www.aftvnews.com/?p=46214), [TROYPOINT](https://troyp
 
 No build 1272 (patch 2025-07-05), `pm disable-user` é recusado para qualquer pacote (`Warning! This command is illegal!`). A neutralização terá que ser por `pm suspend` + `appops`, se o firmware aceitar.
 
+## Achado: polling de atualização a cada segundo
+
+`adb logcat` mostra, uma vez por segundo, o par:
+
+```
+I SystemUpdateManagerService: No existing info file /data/system/system-update-info.xml
+I ClearDataForGotaFun: ... #getSystemUpdateStatus() status is 0
+```
+
+O PID dessas linhas é o `com.nes.coreservice` (confirmado com `ps -A`). São ~86 mil consultas por dia acordando a CPU, num aparelho em que nenhuma atualização vai chegar. No mesmo log, `com.nes.daemon` aparece em `DaemonService ... onRemoveCompleted`, um callback de **apagar dados de app**: o daemon limpa dados de pacotes em segundo plano. Os dois serviços NES são os principais suspeitos de custo em repouso.
+
 ## Por que não aplicar às cegas
 
 No Nokia Streaming Box 8000 (mesma fabricante e middleware), o `com.nes.coreservice` foi **mantido** porque concentra o LED frontal, mensagens de OTA e um receptor de analytics. Então desabilitar pode ter efeito colateral. A investigação existe para descobrir qual.
