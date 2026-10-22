@@ -39,3 +39,18 @@ valid_pkg() { [[ "$1" =~ ^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$ ]]; }
 is_core() {
   [[ "$1" =~ ^(android|com\.android\.systemui|com\.android\.shell|com\.android\.phone|com\.android\.settings|com\.android\.tv\.settings|com\.android\.vending|com\.google\.android\.gms|com\.android\.providers\..*|com\.(google\.)?android\.(permissioncontroller|packageinstaller|ext\.services|ext\.shared|modulemetadata))$ ]]
 }
+
+# Turns the given accessibility services on without dropping others already enabled. A force-stop of an
+# app switches accessibility off and removes its services from the list, so call this after one too.
+enable_services() {
+  local current svc
+  for svc in "$@"; do
+    current="$(sh_tv settings get secure enabled_accessibility_services)"
+    case ":$current:" in
+      *":$svc:"*) ;;
+      *:null:|*::) sh_tv settings put secure enabled_accessibility_services "$svc" ;;
+      *) sh_tv settings put secure enabled_accessibility_services "$current:$svc" ;;
+    esac
+  done
+  sh_tv settings put secure accessibility_enabled 1
+}

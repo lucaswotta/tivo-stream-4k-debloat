@@ -81,6 +81,7 @@ scripts/bench.sh depois
 scripts/rollback.sh examples/tivo-stream-4k/debloat.txt   # desfaz tudo
 scripts/build-launcher.sh               # compila o launcher e o serviço da tecla Home
 scripts/install-launcher.sh             # instala os dois (docs/05-launcher.md)
+scripts/push-theme.sh                   # botões TiVo, Guide e Live (docs/08-controle.md)
 scripts/post-boot.sh                    # depois de cada boot, ~2 min após ligar
 ```
 

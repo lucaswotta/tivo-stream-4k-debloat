@@ -231,3 +231,11 @@ Mesmo limite de antes: a coluna da esquerda foi medida logo após o boot e a da 
 
 **Apps que sumiram.** O dono reportou falta de apps. Pacotes de usuário antes: `tvbrowser`, `nextapp.fx`, `sendfilestotv`, `livetv.tve`, `unitviptv`, mais o Downloader instalado depois. Agora: `unitviptv`, `sendfilestotv`, `nextapp.fx`. O log mostra `tvbrowser` e `livetv.tve` removidos pelo fluxo interativo (launcher > Informações do app > `UNINSTALL_PACKAGE` do instalador de pacotes, a 11 s um do outro); o dono confirmou que apagou os dois. O Downloader consta na lista fixa do `coreservice` ([03](03-coreservice.md)) e não aparece no log do boot atual (já havia sumido); sem log do período anterior não dá para dizer se foi o dono ou o `coreservice` num dos reboots de 17:10 a 17:24, quando o `coreservice` estava sem suspensão para a comparação de benchmark. Aberto.
 - **Pendente:** teclas TiVo, Guide e Live; protetor de tela; Downloader (a lista de remoção do `coreservice` o inclui, então não sobrevive a reboot); `config.xml`/tema do launcher.
+
+## 2026-10-22 — Teclas TiVo, Guide e Live
+
+- Keycodes lidos dos botões reais com um log temporário no serviço de tecla Home (removido; o APK instalado não contém o log): TiVo 173 (`DVR`), Guide 172 (`GUIDE`), **Live 5124**, Skip 272. Tabela em [08](08-controle.md).
+- Tema `examples/tivo-stream-4k/theme/config.json` (`dock_apps`, `app_keys`, `settings_key_keycodes`, `tile_menu`, `home_idle_clock_minutes: 10`) enviado por `scripts/push-theme.sh` (`content write` pelo provedor do launcher, o arquivo fica com o dono certo, `u0_a104`). O `tile_menu: true` troca o segurar OK, que abria "Informações do app" direto, por um menu com Mover, Remover e Informações.
+- O `dumpsys accessibility` lista um serviço por linha: os scripts liam só a primeira e davam "serviço não ligou" com os dois ligados. Corrigido.
+- Teste com os botões reais: Guide abriu as Configurações, TiVo o YouTube, Live o UniTV; Home voltou ao launcher depois de cada um; sem crash.
+- **Aberto:** Downloader; protetor de tela; ajuste fino do tema (movimento reduzido, papel de parede).
