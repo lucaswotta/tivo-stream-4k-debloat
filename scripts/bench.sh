@@ -3,6 +3,9 @@
 #
 # Uso: scripts/bench.sh <fase> [--boot] [--runs N]
 #   fase: rótulo livre, ex.: antes, depois, lote1
+# Com o launcher próprio, a tecla Home injetada por ADB ainda abre o original (só a tecla real passa pelo
+# serviço de acessibilidade), então: HOME_CMD='am start -n dev.lucaswotta.homelite/.MainActivity'
+#   HOME_PKG=dev.lucaswotta.homelite scripts/bench.sh <fase>
 source "$(dirname "$0")/_lib.sh"
 
 PHASE="${1:?uso: bench.sh <fase> [--boot] [--runs N]}"; shift
@@ -23,6 +26,7 @@ echo "run,metric,value,unit" > "$CSV"
 rec() { echo "$1,$2,$3,$4" >> "$CSV"; printf '  %-28s %s %s\n' "$2" "$3" "$4"; }
 
 home_pkg() {
+  [[ -n "${HOME_PKG:-}" ]] && { echo "$HOME_PKG"; return; }
   sh_tv cmd package resolve-activity --brief -a android.intent.action.MAIN \
     -c android.intent.category.HOME | tail -1 | cut -d/ -f1
 }
@@ -45,7 +49,7 @@ for r in $(seq 1 "$RUNS"); do
     sleep 180   # deixa os serviços de boot assentarem antes de medir memória
   fi
 
-  sh_tv input keyevent KEYCODE_HOME; sleep 5
+  sh_tv ${HOME_CMD:-input keyevent KEYCODE_HOME}; sleep 5
   rec "$r" mem_available_mb "$(sh_tv cat /proc/meminfo | awk '/MemAvailable/{print int($2/1024)}')" MB
   rec "$r" processes "$(sh_tv ps -A | tail -n +2 | wc -l | tr -d ' ')" count
   rec "$r" packages_enabled "$(sh_tv pm list packages -e | wc -l | tr -d ' ')" count
@@ -61,7 +65,7 @@ for r in $(seq 1 "$RUNS"); do
     sh_tv am force-stop "$app"; sleep 2
     t="$(sh_tv am start -W -n "$comp" | awk -F': ' '/TotalTime/{print $2}')"
     rec "$r" "cold_start_ms($app)" "${t:-NA}" ms
-    sleep 3; sh_tv am force-stop "$app"; sh_tv input keyevent KEYCODE_HOME; sleep 3
+    sleep 3; sh_tv am force-stop "$app"; sh_tv ${HOME_CMD:-input keyevent KEYCODE_HOME}; sleep 3
   done
   sh_tv dumpsys meminfo > "$OUT/meminfo-run$r.txt"
 done
