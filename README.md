@@ -44,13 +44,13 @@ Detalhes e o porquê de cada linha em [docs/00-hardware.md](docs/00-hardware.md)
 
 | Métrica | Antes | Depois | Δ |
 |---|---|---|---|
-| RAM disponível em repouso (MemAvailable) | — | — | — |
-| Processos rodando | — | — | — |
-| Pacotes habilitados | — | — | — |
-| PSS do launcher | — | — | — |
-| Tempo de boot até `sys.boot_completed` | — | — | — |
-| Abertura a frio do YouTube (`am start -W`) | — | — | — |
-| Abertura a frio da Netflix | — | — | — |
+| RAM disponível em repouso (MemAvailable), após reboot | 905 MB | 920 MB | +15 MB (dentro do ruído) |
+| Processos rodando | 332 | 330 | -2 |
+| Pacotes habilitados | 102 | 102 | 0 (suspender não desabilita) |
+| PSS do launcher | 60 MB | 64 MB | +4 MB |
+| Tempo de boot até `sys.boot_completed` | 48 s | 48 s | 0 |
+| Abertura a frio do YouTube (`am start -W`) | 668 ms | 673 ms | +5 ms |
+| Abertura a frio da Netflix | 694 ms | 775 ms | +81 ms |
 
 ## Roteiro
 

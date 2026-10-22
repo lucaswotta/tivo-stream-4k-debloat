@@ -121,3 +121,24 @@ A diferença de memória (14 MB) e de tempos está dentro da variação entre ro
 - `packages_enabled` não muda porque suspender não desabilita.
 - `debloat.txt` sem a marca DRAFT: toda linha ativa foi aplicada e testada neste aparelho (uma unidade, um dia). `tvlauncher` continua fora, sem launcher novo.
 - **Próximo:** comparação limpa pós-reboot (sem as suspensões) e Fase 4, launcher novo (HOME `priority 2`; ver [09](09-referencias.md)).
+
+## 2026-10-22 — Comparação limpa: com e sem as suspensões
+
+Método igual nos dois lados: `bench.sh --boot --runs 3` (reboot, 180 s de espera, medição), mediana. "Sem" = as 10 suspensões desfeitas com `rollback.sh --pkg` (os 5 pacotes removidos antes ficaram como estavam); "com" = a lista aplicada, sem `force-stop` depois do boot.
+
+| Métrica | Sem suspensões | Com suspensões | Δ |
+|---|---|---|---|
+| Boot | 48 s | 48 s | 0 |
+| `MemAvailable` | 905 MB | 920 MB | +15 MB |
+| Processos | 332 | 330 | -2 |
+| PSS do launcher | 60 MB | 64 MB | +4 MB |
+| YouTube a frio | 668 ms | 673 ms | +5 ms |
+| Netflix a frio | 694 ms | 775 ms | +81 ms |
+| Prime a frio | 1519 ms | 1479 ms | -40 ms |
+
+- Rodadas individuais de `MemAvailable` sem suspensão: 904 e 905 MB (a terceira não foi anotada à parte). Não vale ler +15 MB como ganho: está no tamanho da variação já vista (976 a 990 MB na linha de base).
+- O "antes e depois" anterior (+82 MB, launcher 104 → 68 MB) era em grande parte efeito de comparar um aparelho ligado há horas com um recém-reiniciado. Vale esta tabela, não aquela.
+- Sobre o desempenho, a lista não mostra ganho mensurável neste aparelho. O que ela comprova: o polling de 1/s do `coreservice` vai a zero e o `sageservice` deixa de ficar em 88 a 139 MB de RSS quando recebe `force-stop`. Mesmo assim, com todos os processos parados à mão, a memória total só sobe da ordem de 100 MB (soma dos RSS medidos em repouso: ~178 MB), o que o `MemAvailable` oscilando não separa do ruído.
+- A contagem de `ClearDataForGotaFun` sem suspensão não foi refeita nesta rodada (o comando foi cortado por `timeout`); vale a medição anterior: 180 em 180 s.
+- Lista reaplicada: os 10 pacotes `suspended=true` de novo, `force-stop` em `coreservice` e `sageservice`.
+- **Conclusão:** o benefício real do projeto, até aqui, é privacidade e menos atividade de fundo, não velocidade. O ganho de velocidade, se houver, virá do launcher novo (Fase 4) e da troca da home.
