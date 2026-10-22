@@ -1,0 +1,47 @@
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java b/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java
+index ea00306..dd0b7e9 100644
+--- a/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java
++++ b/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java
+@@ -428,8 +428,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+         h.name.setVisibility(dockRow && position < dockSize && restNameAlpha == 0f ? View.INVISIBLE : View.VISIBLE);
+         boolean focused = h.card.isFocused();   // a rebind after reload() can hit the focused tile
+         h.name.setAlpha(focused ? 1f : restNameAlpha);
+-        h.card.setScaleX(focused && animations ? focusScale() : 1f);
+-        h.card.setScaleY(focused && animations ? focusScale() : 1f);
++        h.card.setScaleX(focused ? focusScale() : 1f);
++        h.card.setScaleY(focused ? focusScale() : 1f);
+         h.card.setTranslationY(focused && advancedEffects ? -4f * ctx.getResources().getDisplayMetrics().density : 0f);
+         h.card.setTranslationZ(focused && advancedEffects ? 8f * ctx.getResources().getDisplayMetrics().density : 0f);
+         h.banner.setScaleX(focused && advancedEffects ? 1.035f : 1f);
+@@ -612,7 +612,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+     }
+ 
+     float focusScale() {
+-        return !animations ? 1f : advancedEffects ? 1.12f : 1.10f;
++        return advancedEffects ? 1.12f : 1.10f;
+     }
+ 
+     /** A vivid colour sampled from the app's banner (or icon), cached per entry; a card's accent when it set one. */
+@@ -725,17 +725,18 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+                 view.animate().cancel();
+                 banner.animate().cancel();
+                 name.animate().cancel();
+-                float scale = !animations ? 1f : advancedEffects ? 1.12f : 1.10f;
++                float scale = advancedEffects ? 1.12f : 1.10f;
+                 float s = focused ? scale : 1f;
+                 if (!animations) {
+-                    view.setScaleX(1f);
+-                    view.setScaleY(1f);
++                    // TiVo Stream 4K: the focused tile still grows, but at once.
++                    view.setScaleX(s);
++                    view.setScaleY(s);
+                     view.setTranslationY(0f);
+                     view.setTranslationZ(0f);
+                     banner.setScaleX(1f);
+                     banner.setScaleY(1f);
+                     name.setAlpha(focused ? 1f : restNameAlpha);
+-                    name.setTranslationY(0f);
++                    name.setTranslationY(focused ? density * 4f : 0f);
+                 } else if (reducedMotion) {
+                     // A short zoom with no hardware layer: building a layer for so short an animation costs more
+                     // frames than it saves. The name just appears instead of fading.

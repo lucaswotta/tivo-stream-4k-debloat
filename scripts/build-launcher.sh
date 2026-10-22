@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Builds the cleanyourtv launcher (Gathin23/cleanyourtv, MIT) at a pinned commit with
-# launcher/home-category.patch applied, and the HomeKey service APK next to it.
+# the patches in launcher/ applied, and the HomeKey service APK next to it.
 # Needs JDK 17 and the Android SDK in ~/.local/share/tivo-toolchain; Gradle and the AndroidX
 # libraries are downloaded by the project's own Gradle wrapper on the first run.
 #
@@ -23,7 +23,7 @@ fi
 git -C "$SRC" fetch -q --depth 1 origin "$PIN"
 git -C "$SRC" checkout -q -f "$PIN"
 git -C "$SRC" clean -qfd
-git -C "$SRC" apply "$ROOT/launcher/home-category.patch"
+for patch in "$ROOT"/launcher/*.patch; do git -C "$SRC" apply "$patch"; done
 
 cd "$SRC/launcher"
 echo "sdk.dir=$ANDROID_HOME" > local.properties

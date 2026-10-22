@@ -328,3 +328,11 @@ Primeira tentativa inválida: o `push-theme.sh` falhou nas três variantes por f
 - Nenhuma variante foi aplicada ao tema do repositório. Estado final do aparelho: `v0` (o tema atual), serviços de tecla ligados.
 - **Conclusão:** o launcher já está leve (24 a 26 MB de PSS, ~0,5% de quadros travados, abrindo em ~0,4 s). `reduced_motion` poupa trabalho de GPU e deixa o movimento mais seco; os outros ajustes valem 1 a 2 MB.
 - **Aplicado a pedido do dono:** `"reduced_motion": true` em `examples/tivo-stream-4k/theme/config.json`, enviado por `scripts/push-theme.sh` (serviços de tecla religados e conferidos). Para desfazer: apagar a linha e rodar o script de novo.
+
+## 2026-10-22 — Foco instantâneo, sem halo, com zoom
+
+- Pedido do dono: sem blur em volta do app selecionado e sem a animação do quadro indo de um botão a outro, mudança instantânea; o app selecionado pode crescer um pouco, porque ajuda a ver qual está selecionado.
+- Tema: `animations: false` e `focus_overshoot: false` (mais o `reduced_motion: true` já aplicado). A troca ficou instantânea, mas o halo continuou, e o zoom sumiu: no código, `animations: false` zera o zoom (`focusScale()` devolve 1).
+- O halo são 12 anéis de brilho desenhados em `GlassView.onDraw`, sem chave de tema. `launcher/no-focus-glow.patch` os remove e mantém a borda branca. `launcher/instant-focus-zoom.patch` mantém o crescimento de 10% sem animar, no adaptador e no cálculo do contorno. `scripts/build-launcher.sh` passou a aplicar todos os `launcher/*.patch`.
+- Captura da tela depois de instalar os três patches: Netflix em foco, maior que os outros, com a borda branca e sem halo.
+- Não medi o efeito no p90 dos quadros depois desses patches.

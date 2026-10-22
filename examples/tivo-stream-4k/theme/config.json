@@ -13,5 +13,7 @@
     172
   ],
   "tile_menu": true,
-  "reduced_motion": true
+  "reduced_motion": true,
+  "animations": false,
+  "focus_overshoot": false
 }
