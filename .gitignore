@@ -1,0 +1,5 @@
+# Saída bruta dos scripts: pode conter nomes de rede, contas e IDs do aparelho.
+# Copie para docs/ só o que for publicar, depois de revisar.
+runs/
+*.log
+.DS_Store

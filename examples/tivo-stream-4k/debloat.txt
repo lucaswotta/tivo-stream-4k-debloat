@@ -1,0 +1,54 @@
+# DRAFT - NOT TESTED. Candidates only; scripts/apply.sh refuses this file until this line is removed.
+#
+# TiVo Stream 4K (model IPA1104HDW, SKU RA2400, SEI Robotics, Amlogic S905Y2, NES middleware), 2 GB RAM
+# Android TV <10|12> (SDK <xx>), build <ro.build.fingerprint>          <- fill from scripts/probe.sh
+#
+# Apply:   TV_HOST=<ip> tools/disable.sh examples/tivo-stream-4k/debloat.txt
+# Undo:    TV_HOST=<ip> tools/restore.sh examples/tivo-stream-4k/debloat.txt com.google.android.tvlauncher
+# Everything is DISABLED, not uninstalled. Comment out any line you want to keep.
+#
+# Stock launcher: com.google.android.tvlauncher (classic Android TV, Home/Shop/Apps tabs).
+# A streaming stick: no HDMI inputs or tuner, leave live_tv_package empty in config.xml.
+#
+# Same ODM and middleware as examples/nokia-streaming-box-8000 and examples/dialog-viu-sei103dl.
+# On the Nokia, every pm disable* was refused ("This command is illegal!") and tvlauncher could not
+# lose HOME (priority 2). Check both on the TiVo before anything else.
+#
+# Known quirk on this firmware (Android 12 OTA): com.nes.coreservice uninstalls custom launchers,
+# Downloader and ADB tools right after install (AFTVnews, 2024). On the Nokia it also drives the LED,
+# OTA messages and an analytics receiver, so watch for side effects after disabling it.
+#
+# Kept on purpose (expected from the SEI/NES cousins, confirm with dumpsys package):
+#   com.nes.blerc                 Bluetooth remote and pairing
+#   com.nes.tvglobalkeyhandler    remote shortcut buttons (Netflix, Guide, Live, TiVo)
+#   com.droidlogic.*              Amlogic vendor: HDMI-CEC, picture, sleep timer
+#   Play Store, Play Services, keyboard, com.google.android.katniss (mic), mediashell (Chromecast)
+
+# Telemetry and feedback
+com.google.android.feedback
+com.google.android.partnersetup                 # Google RLZ partner attribution pings
+com.google.android.tv.bugreportsender
+com.nes.tvbugtracker                            # NES bug tracker (Dialog ViU), may not exist here
+
+# App blocker
+com.nes.coreservice                             # uninstalls launchers/ADB tools; see docs/03-coreservice.md
+
+# Recommendations, partner rows and auto-installs
+com.google.android.tvrecommendations
+com.nes.leanbacklauncher.partnercustomizer      # Shop/Discover rows config (Nokia)
+android.autoinstalls.config.sei                 # Play auto-install of partner apps
+# com.nes.skywayclient                          # boot ads + silent installs (Dialog), firmware check (Nokia): test last
+
+# Factory leftovers
+com.utsmta.app                                  # NES factory test app, listens for USB sticks
+
+# Preloaded apps, off by choice
+com.google.android.play.games
+com.android.printspooler
+com.google.android.marvin.talkback              # re-enable if you need the screen reader
+com.google.android.youtube.tvmusic
+# com.google.android.videos                     # Play Movies & TV, still pinned on this box's favourites
+# com.tivo.atom                                 # TiVo Stream app (guide/aggregator): confirm name with probe
+
+# Stock home. Disable only after the new launcher is installed and owns HOME.
+# com.google.android.tvlauncher
