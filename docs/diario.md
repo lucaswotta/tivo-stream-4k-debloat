@@ -336,3 +336,10 @@ Primeira tentativa inválida: o `push-theme.sh` falhou nas três variantes por f
 - O halo são 12 anéis de brilho desenhados em `GlassView.onDraw`, sem chave de tema. `launcher/no-focus-glow.patch` os remove e mantém a borda branca. `launcher/instant-focus-zoom.patch` mantém o crescimento de 10% sem animar, no adaptador e no cálculo do contorno. `scripts/build-launcher.sh` passou a aplicar todos os `launcher/*.patch`.
 - Captura da tela depois de instalar os três patches: Netflix em foco, maior que os outros, com a borda branca e sem halo.
 - Não medi o efeito no p90 dos quadros depois desses patches.
+
+## 2026-10-22 — Destaque do foco removido por inteiro
+
+- Pedido do dono: tirar a linha de seleção e o blur branco e deixar só o crescimento do app selecionado.
+- `launcher/no-focus-glow.patch` (só os anéis de brilho) foi substituído por `launcher/no-focus-highlight.patch`: `GlassView.onDraw` não desenha nada (borda, anéis e brilho do vidro) e o construtor não pede mais a camada de hardware. A posição do destaque ainda é calculada, sem custo visível.
+- Captura depois de instalar: a Play Store, selecionada na segunda linha, está maior que os vizinhos, sem borda, halo nem brilho; o nome aparece embaixo. Sem crash (buffer `crash` vazio).
+- **Ainda visíveis, não removidos por não estarem no pedido:** o nome do app em foco e o brilho colorido do fundo, que muda de cor com o app (`ambient_glow`, desligável no tema). Não medi quadros depois deste patch.
