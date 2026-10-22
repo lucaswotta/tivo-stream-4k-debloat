@@ -290,3 +290,17 @@ A abertura da Netflix variou entre as medições (511 e 653 ms) sem que nada nel
 - `cmd notification disallow_listener com.google.android.tvrecommendations/com.google.android.tvrecommendations.NotificationsService`: o processo caiu e não voltou. Valor original em `runs/2026-10-22_ouvintes-original.txt` e em [10](10-bootclean.md).
 - Depois de um reboot a lista seguiu vazia (persistiu), mas o processo voltou, agora `for content provider {NotificationContentProvider}`. Incluído nos `force-stop` do `bootclean` e do `post-boot.sh`.
 - Verificado: depois de uma execução do `bootclean`, `coreservice`, `sageservice`, `tvlauncher`, `katniss` e `tvrecommendations` sem processo, e nenhum voltou em 90 s. Não repeti o ciclo completo de reboot para esta inclusão (o mecanismo é o mesmo já testado). `MemAvailable` medido logo depois: 1000 MB, 2 minutos depois de um boot, sem assentar; o ganho real desse processo (34 MB de PSS) ficou dentro do ruído da medição (+9 MB).
+
+## 2026-10-22 — Quanto mais dá para tirar do processador e da GPU
+
+- **Hardware medido:** 4 núcleos ARM (fabricante `0x41`; os docs do projeto dão Cortex-A53) de 100 MHz a 1,8 GHz, governor `interactive` (11 degraus), Mali-G31 com OpenGL ES 3.2, userspace só `armeabi-v7a`, interface em 1920x1080 a 320 dpi. Decodificadores de hardware (`media_codecs.xml`): H.264, H.265 e VP9 (inclusive as variantes `.secure`); AV1 não consta.
+- **O que o shell não alcança:** `scaling_governor` e `scaling_max_freq` pertencem a `system` (`-rw-rw-r--` e `-rw-rw----`) e o shell é uid 2000: não dá para mudar governor nem frequência. Bootloader travado (sem ROM alternativa), então overclock está fora.
+- **Teste de carga da interface** (`dumpsys gfxinfo com.gathin.tvhome`, 24 passos de D-pad por passada, 0,35 s entre eles, duas passadas por condição):
+
+| Interface | Quadros | Quadros travados | p90 do quadro | p95 |
+|---|---|---|---|---|
+| 1080p (atual) | 653 e 637 | 3 e 3 (0,46%) | 27 e 16 ms | 28 e 16 ms |
+| 720p (`wm size 1280x720`, `wm density 213`) | 654 e 641 | 0 e 0 | 11 e 11 ms | 12 e 12 ms |
+
+- **Leitura:** a navegação já é fluida em 1080p (99,5% dos quadros dentro do orçamento de 16,7 ms de 60 fps). Em 720p a cauda some e o p90 cai para 11 ms, mas o ganho é pequeno em termos absolutos, a mediana não melhorou (6 e 8 ms contra 9 e 10 ms) e a interface fica mais macia na tela de 1080p. Não foi aplicado: `wm size reset` e `wm density reset` devolveram 1920x1080 a 320 dpi (conferido).
+- **Para aplicar, se um dia houver engasgo:** `adb shell wm size 1280x720; adb shell wm density 213`. Para desfazer: `wm size reset; wm density reset`. O vídeo não muda: vai por um plano de hardware separado da interface.
