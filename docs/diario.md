@@ -162,3 +162,23 @@ Achados para a troca de launcher:
 - Esta build (Android 12) não tem `cmd role get-role-holders`; HOME é decidido por `set-home-activity` (preferred activity). `tvlauncher` tem prioridade 2 e é app de sistema atualizado (`UPDATED_SYSTEM_APP`, `PRIVILEGED`).
 - `free-my-tv` (`HomeMode.restoreHome`) usa `set-home-activity` e, como reversão, `cmd package set-home-activity <stock>`; no Android 9/12 sem `cmd role` o `remove-role-holder` não existe.
 - A máquina de desenvolvimento só tem JDK 25 e não tem Android SDK. O launcher do `cleanyourtv` pede JDK 17, SDK 34 e Gradle; compilar exige baixar essas ferramentas.
+
+## 2026-10-22 — Launcher próprio e o teste de HOME
+
+Ferramentas baixadas de fontes oficiais, com checksum conferido (Temurin 17.0.21+9: SHA-256; `commandlinetools-linux-16111833`: SHA-1 do `repository2-3.xml`). Instaladas em `~/.local/share/tivo-toolchain` (fora do repo, sem tocar em `.bashrc`): JDK 17, `build-tools;34.0.0`, `platforms;android-34`.
+
+Launcher próprio `dev.lucaswotta.homelite` (`launcher/`, commit `59b0e37`): grade de apps Leanback com banner, relógio e data. APK de 16,8 KB, **nenhuma permissão**, sem serviço, sem biblioteca, sem rede. Build sem Gradle (`launcher/build.sh`: `aapt2`, `javac --release 8`, `d8`, `zipalign`, `apksigner`).
+
+- Armadilha de build: o `d8` de `build-tools` 34 aborta com `NullPointerException` em classes que o `javac` 17 marca com `MethodParameters` sem nome (classe interna não estática, classe anônima, método ponte de `Comparator`). Contorno no código: classes aninhadas `static`, `TreeMap` com `Collator` no lugar de `Comparator` próprio.
+- Abre em 395 ms a frio (`am start -W`). Tela conferida por captura: 10 tiles (FX, Navegador Web, Netflix, Play Store, Prime Video, Send Files To TV, TVExpress BR, UniTV, YouTube, Configurações).
+- O Downloader (`com.esaba.downloader`) não aparece na grade: não declara `LEANBACK_LAUNCHER`, ou foi desinstalado. A conferir.
+
+**Teste de HOME (resultado negativo, igual ao Nokia 8000):**
+- `cmd package set-home-activity --user 0 dev.lucaswotta.homelite/.MainActivity` → `Success`. `dumpsys role` mostra o papel HOME com o `homelite` e `dumpsys package preferred` mostra a atividade preferida `homelite` (`mAlways=true`).
+- Mesmo assim, a tecla Home e `am start -a MAIN -c HOME` abrem `com.google.android.tvlauncher/.MainActivity` (log: `START ... cmp=com.google.android.tvlauncher/.MainActivity`). `resolve-activity` continua devolvendo o `tvlauncher` com `priority=2`.
+- Causa provável (não confirmada no código-fonte do firmware): a resolução do intent escolhe o filtro de maior prioridade antes de consultar a preferência do usuário, e um app instalado não passa de prioridade 0 num filtro.
+- Desvios tentados, todos recusados: `pm disable com.google.android.tvlauncher/.MainActivity` (`SecurityException: Shell cannot change component state`); `pm disable-user` e `uninstall --user 0` já recusados antes (app core).
+- Configurações da TV > Apps > Android TV Home (v7.7.15): só Forçar parada, Desinstalar atualizações, Remover dados, Limpar cache, Limpar ações padrão, Notificações e Permissões. **Sem botão Desativar.**
+- Estado restaurado: `set-home-activity` devolvido ao `tvlauncher`; papel HOME de volta com ele; tecla Home normal. O `homelite` segue instalado, fora do caminho.
+
+**Aberto:** como fazer o `homelite` receber a tecla Home sem root. Opções, nenhuma testada: (1) "Desinstalar atualizações" do `tvlauncher` (volta à versão de fábrica; se o botão Desativar aparecer depois, resolve); (2) serviço de acessibilidade que intercepta a tecla Home e abre o `homelite` (a abordagem de `HomeKeyService` do `cleanyourtv`/`free-my-tv`; custo: um serviço permanente e a permissão `WRITE_SECURE_SETTINGS` concedida por ADB); (3) usar o `homelite` só como app de atalho, sem tomar a tecla Home.
