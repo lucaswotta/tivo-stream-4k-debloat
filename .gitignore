@@ -6,3 +6,4 @@ runs/
 launcher/build/
 launcher/*.jks
 launcher/*.apk
+launcher/*.idsig

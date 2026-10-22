@@ -109,6 +109,7 @@ public class MainActivity extends Activity
     protected void onStart() {
         super.onStart();
         reload();
+        focusFirstTile();
     }
 
     @Override
@@ -116,7 +117,25 @@ public class MainActivity extends Activity
         super.onNewIntent(intent);
         if (grid != null) {
             grid.setSelection(0);
-            grid.requestFocus();
+            focusFirstTile();
+        }
+    }
+
+    private void focusFirstTile() {
+        grid.post(new FocusFirst(grid));
+    }
+
+    private static final class FocusFirst implements Runnable {
+        private final GridView grid;
+
+        FocusFirst(GridView grid) {
+            this.grid = grid;
+        }
+
+        @Override
+        public void run() {
+            View first = grid.getChildAt(0);
+            if (first != null && grid.findFocus() == null) first.requestFocus();
         }
     }
 
