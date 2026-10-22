@@ -3,7 +3,9 @@
 runs/
 *.log
 .DS_Store
-launcher/build/
-launcher/*.jks
+homekey/build/
+homekey/*.jks
+homekey/*.apk
 launcher/*.apk
+homekey/*.idsig
 launcher/*.idsig

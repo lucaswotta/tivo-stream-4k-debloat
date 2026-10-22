@@ -4,8 +4,8 @@
 # Uso: scripts/bench.sh <fase> [--boot] [--runs N]
 #   fase: rótulo livre, ex.: antes, depois, lote1
 # Com o launcher próprio, a tecla Home injetada por ADB ainda abre o original (só a tecla real passa pelo
-# serviço de acessibilidade), então: HOME_CMD='am start -n dev.lucaswotta.homelite/.MainActivity'
-#   HOME_PKG=dev.lucaswotta.homelite scripts/bench.sh <fase>
+# serviço de acessibilidade), então: HOME_CMD='am start -n com.gathin.tvhome/.MainActivity'
+#   HOME_PKG=com.gathin.tvhome scripts/bench.sh <fase>
 source "$(dirname "$0")/_lib.sh"
 
 PHASE="${1:?uso: bench.sh <fase> [--boot] [--runs N]}"; shift

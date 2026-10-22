@@ -1,0 +1,18 @@
+diff --git a/launcher/app/src/main/AndroidManifest.xml b/launcher/app/src/main/AndroidManifest.xml
+index 4cee7a6..96a35c0 100644
+--- a/launcher/app/src/main/AndroidManifest.xml
++++ b/launcher/app/src/main/AndroidManifest.xml
+@@ -82,11 +82,8 @@
+             android:clearTaskOnLaunch="true"
+             android:configChanges="orientation|screenSize|keyboard|keyboardHidden|uiMode"
+             android:screenOrientation="landscape">
+-            <intent-filter>
+-                <action android:name="android.intent.action.MAIN" />
+-                <category android:name="android.intent.category.HOME" />
+-                <category android:name="android.intent.category.DEFAULT" />
+-            </intent-filter>
++            <!-- HOME category removed for the TiVo Stream 4K: com.nes.coreservice uninstalls every
++                 non-system app that declares it. homekey/ opens this activity by component. -->
+             <!-- Listed in the TV's own app list, so it can be opened from the stock home screen too. -->
+             <intent-filter>
+                 <action android:name="android.intent.action.MAIN" />
