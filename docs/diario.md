@@ -304,3 +304,11 @@ A abertura da Netflix variou entre as medições (511 e 653 ms) sem que nada nel
 
 - **Leitura:** a navegação já é fluida em 1080p (99,5% dos quadros dentro do orçamento de 16,7 ms de 60 fps). Em 720p a cauda some e o p90 cai para 11 ms, mas o ganho é pequeno em termos absolutos, a mediana não melhorou (6 e 8 ms contra 9 e 10 ms) e a interface fica mais macia na tela de 1080p. Não foi aplicado: `wm size reset` e `wm density reset` devolveram 1920x1080 a 320 dpi (conferido).
 - **Para aplicar, se um dia houver engasgo:** `adb shell wm size 1280x720; adb shell wm density 213`. Para desfazer: `wm size reset; wm density reset`. O vídeo não muda: vai por um plano de hardware separado da interface.
+
+## 2026-10-22 — Botão do Assistente abre a Play Store
+
+- Pedido do dono: o controle tem botão de Assistente; desativado o Assistente, ele não fazia nada, e o dono suspeitava do microfone do controle. `getevent -lt /dev/input/event6` (dispositivo `TiVo Remote`) mostrou `KEY_SEARCH` ao apertar: o botão e o Bluetooth do controle funcionam. O microfone não foi testado (exigiria reativar o Assistente).
+- `app_keys` com `KEYCODE_ASSIST:com.android.vending` não fez nada, e o log do sistema mostrou `HomeKeyReceiver: reason: assist` a cada toque. Um log temporário em `onKeyEvent` não recebeu **nenhum** evento dessa tecla: o Android a consome antes do filtro de acessibilidade. Log removido (o APK instalado não o contém).
+- Solução: `AssistActivity` em `homekey/` (filtro `ACTION_ASSIST`, abre a Play Store e termina) e `settings put secure assistant dev.lucaswotta.homekey/.AssistActivity`. Botão real: abriu a Play Store. O `bootclean` passou a gravar esse setting no lugar de esvaziá-lo.
+- Um toque dado com 1 minuto de uptime não funcionou: a primeira execução do `bootclean` era 60 s depois do boot e, até lá, o Android deixa o Katniss como assistente. Passou a rodar também na hora do `BOOT_COMPLETED`: com ~48 s de uptime o setting já estava correto (`bootclean` iniciou às 20:23:01 e parou o `coreservice` 0,7 s depois).
+- `homekey` ganhou `<queries>` para `com.android.vending` e uma `Activity` exportada sem permissão nova.

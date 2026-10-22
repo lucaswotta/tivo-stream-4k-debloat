@@ -12,7 +12,8 @@ import java.io.IOException;
  * from the shell does, and the TV's own adbd is the only shell an app can reach.
  *
  * Android fills the Assistant settings back in with Katniss at every boot, and as long as it is the
- * registered Assistant the system keeps its interactor process alive, so they are cleared here too.
+ * registered Assistant the system keeps its interactor process alive. The Assistant button goes to
+ * homekey's AssistActivity (opens the Play Store) and the voice interaction service is cleared.
  */
 public class CleanJob extends JobService {
     private static final String TAG = "bootclean";
@@ -28,7 +29,7 @@ public class CleanJob extends JobService {
     };
 
     private static final String[] COMMANDS = {
-        "settings put secure assistant ''",
+        "settings put secure assistant dev.lucaswotta.homekey/.AssistActivity",
         "settings put secure voice_interaction_service ''",
     };
 

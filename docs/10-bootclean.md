@@ -8,8 +8,8 @@
 
 ## O que ele faz
 
-1. `BootReceiver` recebe `BOOT_COMPLETED` e agenda três execuções (`JobScheduler`) 60, 150 e 300 s depois, quando os serviços já subiram.
-2. `CleanJob` conecta ao `adbd` da própria TV em `127.0.0.1:5555`, autentica com uma chave RSA própria e roda comandos fixos: limpa os settings `assistant` e `voice_interaction_service` (o Android os preenche com o Katniss a cada boot, e enquanto ele é o Assistente registrado o sistema mantém o processo `katniss:interactor` vivo) e dá `am force-stop` nos seis pacotes.
+1. `BootReceiver` recebe `BOOT_COMPLETED` e agenda quatro execuções (`JobScheduler`): na hora, e 60, 150 e 300 s depois, para os serviços que sobem tarde. A primeira roda com ~48 s de uptime, o instante em que a TV termina de ligar; antes disso o app nem existe, então a remoção de apps pela lista do `coreservice` (primeiros ~35 s) não é evitável.
+2. `CleanJob` conecta ao `adbd` da própria TV em `127.0.0.1:5555`, autentica com uma chave RSA própria e roda comandos fixos: grava `assistant` apontando para `dev.lucaswotta.homekey/.AssistActivity` (o botão do Assistente abre a Play Store, ver [08](08-controle.md)) e esvazia `voice_interaction_service` (o Android os preenche com o Katniss a cada boot, e enquanto ele é o Assistente registrado o sistema mantém o processo `katniss:interactor` vivo) e dá `am force-stop` nos seis pacotes.
 3. O cliente ADB (`Adb.java`) é adaptado do `free-my-tv` (MIT, licença em `bootclean/LICENSE-free-my-tv`).
 
 ## O `tvrecommendations`
@@ -30,7 +30,7 @@ Ele subia no boot como **serviço de escuta de notificações** (`NotificationsS
 scripts/install-launcher.sh --remove    # desinstala também o bootclean
 ```
 
-e, na TV, Opções do desenvolvedor > Revogar autorizações de depuração USB. Para o Assistente: `settings put secure assistant com.google.android.katniss/.search.serviceapi.KatnissVoiceInteractionService` e o mesmo em `voice_interaction_service`.
+e, na TV, Opções do desenvolvedor > Revogar autorizações de depuração USB. Para devolver o Assistente do Google: `settings put secure assistant com.google.android.katniss/.search.serviceapi.KatnissVoiceInteractionService` e o mesmo em `voice_interaction_service`, `scripts/rollback.sh --pkg com.google.android.katniss`, e tirar `katniss` da lista do `CleanJob`.
 
 ## Instalação
 

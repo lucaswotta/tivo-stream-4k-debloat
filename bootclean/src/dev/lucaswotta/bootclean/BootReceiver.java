@@ -8,11 +8,12 @@ import android.content.Context;
 import android.content.Intent;
 
 /**
- * Schedules the cleanup a minute or so after boot, when the services it stops have come up, and again
- * later for the ones that start late. A manual RUN starts it at once.
+ * Schedules the cleanup as soon as the boot is done, which is when Android has already filled the
+ * Assistant settings in, and again a minute, two and five minutes later for the services that start late.
+ * A manual RUN starts it at once.
  */
 public class BootReceiver extends BroadcastReceiver {
-    private static final long[] AFTER_BOOT_MS = {60_000, 150_000, 300_000};
+    private static final long[] AFTER_BOOT_MS = {0, 60_000, 150_000, 300_000};
     private static final long[] MANUAL_MS = {0, 120_000};
 
     @Override
