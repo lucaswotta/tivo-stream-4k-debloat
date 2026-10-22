@@ -3,3 +3,6 @@
 runs/
 *.log
 .DS_Store
+launcher/build/
+launcher/*.jks
+launcher/*.apk
