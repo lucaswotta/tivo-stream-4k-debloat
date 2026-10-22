@@ -7,10 +7,10 @@
 source "$(dirname "$0")/_lib.sh"
 connect
 
-# com.nes.coreservice and com.tivo.sageservice come back at boot; the stock launcher only matters while
-# it is Home, which it is not here. com.google.android.tvrecommendations is left out: something else
+# Suspended packages still get their boot broadcasts and bindings, so these come back at every boot:
+# the NES core and TiVo services, the stock launcher and Assistant. com.google.android.tvrecommendations is left out: something else
 # binds it and the system restarts it within a second of a force-stop.
-STOP=(com.nes.coreservice com.tivo.sageservice com.google.android.tvlauncher)
+STOP=(com.nes.coreservice com.tivo.sageservice com.google.android.tvlauncher com.google.android.katniss)
 
 for p in "${STOP[@]}"; do sh_tv am force-stop "$p"; done
 sleep 3
