@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install the launcher (launcher/cleanyourtv.apk) and the Home key service (homekey/HomeKey.apk) and turn
+# Install the launcher (launcher/cleanyourtv.apk) and the Home key service (homekey/homekey.apk) and turn
 # both on: dev.lucaswotta.homekey for the Home key, the launcher's own HomeKeyService for app_keys and the
 # Settings key (scripts/push-theme.sh). Reinstalling clears the service setting, so every install enables it again; other
 # enabled accessibility services are kept. Build both first with scripts/build-launcher.sh.
@@ -30,14 +30,14 @@ if [[ "${1:-}" == "--remove" ]]; then
   exit 0
 fi
 
-for apk in launcher/cleanyourtv.apk homekey/HomeKey.apk; do
+for apk in launcher/cleanyourtv.apk homekey/homekey.apk; do
   [[ -f "$ROOT/$apk" ]] || { echo "falta $apk: rode scripts/build-launcher.sh" >&2; exit 1; }
 done
 
 drop_services "$OLD_PKG/.HomeKeyService"
 sh_tv pm uninstall "$OLD_PKG" >/dev/null 2>&1 || true
 adb -s "$TARGET" install -r "$ROOT/launcher/cleanyourtv.apk" </dev/null
-adb -s "$TARGET" install -r "$ROOT/homekey/HomeKey.apk" </dev/null
+adb -s "$TARGET" install -r "$ROOT/homekey/homekey.apk" </dev/null
 
 enable_services "$SERVICE" "$LAUNCHER/.HomeKeyService"
 
