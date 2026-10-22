@@ -182,3 +182,28 @@ Launcher próprio `dev.lucaswotta.homelite` (`launcher/`, commit `59b0e37`): gra
 - Estado restaurado: `set-home-activity` devolvido ao `tvlauncher`; papel HOME de volta com ele; tecla Home normal. O `homelite` segue instalado, fora do caminho.
 
 **Aberto:** como fazer o `homelite` receber a tecla Home sem root. Opções, nenhuma testada: (1) "Desinstalar atualizações" do `tvlauncher` (volta à versão de fábrica; se o botão Desativar aparecer depois, resolve); (2) serviço de acessibilidade que intercepta a tecla Home e abre o `homelite` (a abordagem de `HomeKeyService` do `cleanyourtv`/`free-my-tv`; custo: um serviço permanente e a permissão `WRITE_SECURE_SETTINGS` concedida por ADB); (3) usar o `homelite` só como app de atalho, sem tomar a tecla Home.
+
+## 2026-10-22 — Home pelo serviço de acessibilidade; o gatilho do coreservice
+
+- Dono confirmou: "Desinstalar atualizações" também podia ser usado; não foi preciso. O serviço de acessibilidade resolveu a Home sem tocar no `tvlauncher`, então essa opção ficou sem teste.
+- `HomeKeyService` (só `onKeyEvent`): a tecla Home **real** abriu o `homelite` (log: `START ... cmp=dev.lucaswotta.homelite/.MainActivity`). A tecla injetada por ADB não passa pelo serviço e abre o `tvlauncher`.
+- O pacote foi desinstalado duas vezes depois de um reboot: log `AppUtil: uninstallAsUser: pkg = dev.lucaswotta.homelite` no PID do `com.nes.coreservice`, seguido de `deletePackageX`. Causa: `EvoBlackListAppsFun` lista as atividades HOME e remove as não-sistema. Detalhes em [03](03-coreservice.md). O `coreservice` suspenso volta no boot e remove antes de qualquer `force-stop` pós-boot chegar a tempo.
+- Correção: o launcher deixou de declarar a categoria HOME (o serviço abre por componente). Depois de um boot completo: pacote presente, Home Lite em foco, serviço ligado, **0** chamadas de `uninstallAsUser` para ele.
+- `adb install -r` zera `enabled_accessibility_services`; criado `scripts/install-launcher.sh` (instala, reabilita sem tirar outros serviços, confere se ligou, `--remove` desfaz).
+- `killBackgroundProcesses` chamado pelo app executa sem erro mas o Android não mata nada (nenhum `Killing ... kill background` no log), enquanto `am kill`/`force-stop` do shell matam `tvlauncher`, `sageservice` e `coreservice`. Removido o código e a permissão; criado `scripts/post-boot.sh` (ADB). O `tvrecommendations` é religado em 1 s por outro componente e fica fora da lista.
+- ADB fica `offline` após o boot em alguns casos: `adb kill-server` e `adb connect` resolvem.
+- `bench.sh` ganhou `HOME_CMD` e `HOME_PKG` porque a tecla Home injetada abriria o `tvlauncher`.
+
+Medição com o Home Lite (reboot, 130 s, `post-boot.sh`, 3 rodadas de `bench.sh`, mediana):
+
+| Métrica | Original + suspensões (pós-boot) | Home Lite + `post-boot.sh` |
+|---|---|---|
+| `MemAvailable` | 920 MB | 1124 MB (+204 MB) |
+| PSS do launcher | 64 MB | 21 MB |
+| Processos | 330 | 314 |
+| YouTube a frio | 673 ms | 503 ms |
+| Netflix a frio | 775 ms | 517 ms |
+| Prime a frio | 1479 ms | 721 ms |
+
+- **Limite da comparação:** a coluna da esquerda foi medida ~3 min depois do boot e a da direita alguns minutos mais tarde, com `coreservice`, `sageservice` e `tvlauncher` parados à força. Parte da diferença é o tempo de assentamento do sistema depois do boot, não só o launcher. Contra a medição sem reboot (YouTube 538 ms, Netflix 527 ms, Prime 691 ms), as aberturas a frio ficaram iguais: o ganho firme é memória, não latência.
+- **Aberto:** um segundo boot não foi medido com `post-boot.sh` automatizado; o script é manual. Teclas TiVo, Guide e Live, protetor de tela e Downloader (não aparece na grade) seguem pendentes.

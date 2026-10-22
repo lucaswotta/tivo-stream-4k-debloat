@@ -4,7 +4,7 @@
 
 ![TiVo Stream 4K, controle e cabo](docs/img/aparelho.jpg)
 
-**Status:** Fases 1 a 3 feitas em uma unidade: 10 pacotes suspensos, nada desinstalado por este projeto. Launcher novo ainda não.
+**Status:** Fases 1 a 4 feitas em uma unidade: 10 pacotes suspensos, nada desinstalado por este projeto, launcher próprio de 17 KB como Home pelo botão do controle.
 
 ---
 
@@ -79,9 +79,11 @@ scripts/bench.sh antes               # linha de base
 scripts/apply.sh examples/tivo-stream-4k/debloat.txt
 scripts/bench.sh depois
 scripts/rollback.sh examples/tivo-stream-4k/debloat.txt   # desfaz tudo
+scripts/install-launcher.sh --build     # launcher próprio como Home (docs/05-launcher.md)
+scripts/post-boot.sh                    # depois de cada boot, ~2 min após ligar
 ```
 
-> ⚠️ A lista em `examples/tivo-stream-4k/debloat.txt` ainda é um **rascunho não testado**. Não aplique antes de ela sair da Fase 3.
+> A lista em `examples/tivo-stream-4k/debloat.txt` foi testada em uma unidade (um dia de uso, 4 reboots). O launcher exige ferramentas de build em `~/.local/share/tivo-toolchain` (JDK 17 e Android SDK 34, ver `launcher/build.sh`).
 
 ## Créditos e base
 

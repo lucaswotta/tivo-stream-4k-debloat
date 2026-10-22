@@ -25,6 +25,15 @@ I ClearDataForGotaFun: ... #getSystemUpdateStatus() status is 0
 
 O PID dessas linhas é o `com.nes.coreservice` (confirmado com `ps -A`). São ~86 mil consultas por dia acordando a CPU, num aparelho em que nenhuma atualização vai chegar. No mesmo log, `com.nes.daemon` aparece em `DaemonService ... onRemoveCompleted`, um callback de **apagar dados de app**: o daemon limpa dados de pacotes em segundo plano. Os dois serviços NES são os principais suspeitos de custo em repouso.
 
+## Achado: a lista negra e a regra do HOME
+
+O log de `com.nes.coreservice` mostra, no boot, a função `EvoBlackListAppsFun`: ela lista as atividades que declaram `android.intent.category.HOME` e chama `AppUtil.uninstallAsUser` nas que não são de sistema (`isSystemApp = false`), além de uma lista fixa de apps (nesta unidade: `com.magistv.magistv`, `com.cfsa.magis`, `com.mycompany.descargarmagistv4281apk`). `tvlauncher` e Configurações passam por serem de sistema. É assim que launchers alternativos somem.
+
+Consequências medidas em 2026-10-22:
+- **Suspender o `coreservice` não impede a remoção.** O pacote suspenso sobe de novo no boot (receiver) e desinstala o launcher próprio em segundos. O Downloader sobreviveu antes porque o `coreservice` estava parado por `am force-stop` naquele momento.
+- **Um app que não declara HOME é ignorado.** O `homelite` sem a categoria sobreviveu a um boot completo com o `coreservice` rodando, com 0 chamadas de `uninstallAsUser` para ele.
+- Um serviço de acessibilidade abre o launcher pela tecla Home (ver [05](05-launcher.md)); por isso o launcher não precisa da categoria.
+
 ## Por que não aplicar às cegas
 
 No Nokia Streaming Box 8000 (mesma fabricante e middleware), o `com.nes.coreservice` foi **mantido** porque concentra o LED frontal, mensagens de OTA e um receptor de analytics. Então desabilitar pode ter efeito colateral. A investigação existe para descobrir qual.
@@ -58,6 +67,6 @@ No Nokia Streaming Box 8000 (mesma fabricante e middleware), o `com.nes.coreserv
 |---|---|
 | Versão do Android quando testado | 12, build 1272 |
 | Componentes suspeitos | `ClearAppDataActivity` e permissões `DELETE_PACKAGES`/`CLEAR_APP_USER_DATA`/`INSTALL_PACKAGES` (uid `system`); `daemon` também tem as duas primeiras ([diário](diario.md)) |
-| Comando que funcionou | — |
-| Sobrevive a reboot? | — |
-| Efeitos colaterais | — |
+| Comando que funcionou | `pm suspend` + `appops` + `am force-stop` pára o polling, mas não o boot; o que protege um launcher é ele não declarar HOME |
+| Sobrevive a reboot? | A suspensão sim; o processo volta no boot (rodar `scripts/post-boot.sh`) |
+| Efeitos colaterais | Nenhum visto em LED, controle, Wi-Fi e YouTube |
