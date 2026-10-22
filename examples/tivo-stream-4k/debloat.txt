@@ -52,7 +52,9 @@ com.nes.tvbugtracker                            # NES bug tracker, present on th
 # App blocker and NES background services. Measured 2026-10-22 at idle (docs/diario.md): coreservice polls
 # update status 1x/s (61 log lines/min, 49 MB RSS) and holds DELETE_PACKAGES/CLEAR_APP_USER_DATA; daemon
 # (PERSISTENT) loops checking the removed skywayclient (41 MB); sageservice (TiVo, 88 MB) is unused here.
-# All three are core: use suspend + appops, not tested yet. coreservice also owns LedReceiver, so watch the LED.
+# All three are core: suspend + appops, tested 2026-10-22 (LED, remote, Wi-Fi, YouTube fine; Downloader stayed
+# installed; 1 reboot). Suspend survives reboot but coreservice/sageservice restart at boot (force-stop them
+# again) and the persistent daemon ignores suspend, so its line has no measurable effect.
 com.nes.coreservice                             # uninstalls launchers/ADB tools; see docs/03-coreservice.md
 com.nes.daemon                                  # loops on the removed skywayclient and clears app data
 com.tivo.sageservice                            # TiVo service, no use outside the US

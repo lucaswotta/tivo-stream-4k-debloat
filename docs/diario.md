@@ -78,3 +78,11 @@ A diferença de memória (14 MB) e de tempos está dentro da variação entre ro
 - `com.nes.coreservice` suspenso: em 90 s, **0** linhas de `ClearDataForGotaFun` e 0 de `SystemUpdateManagerService` (antes: 180 em 180 s cada). O processo não voltou. `MemAvailable` medido logo após o boot: 957 MB (não comparável com a linha de base sem reboot).
 - **Não verificado:** efeito no LED frontal, no aviso de OTA e no controle, e se o `coreservice` ainda desinstala launchers (falta instalar um app para provar). Precisa de olho humano na TV.
 - **Próximo:** conferir LED, Home, volume/TV pelo controle e Wi-Fi; depois instalar o Downloader e ver se sobrevive.
+
+## 2026-10-22 — Teste do Downloader com o coreservice suspenso
+
+- Conferido pelo dono na TV: LED, controle, Wi-Fi e YouTube funcionando com os três pacotes suspensos.
+- `com.esaba.downloader` instalado pela Play Store e aberto. Logcat de 7 min sem remoção; o pacote continuou em `pm list packages` depois de abrir e depois de um reboot.
+- Pós-reboot: os três pacotes seguem `suspended=true`, mas `coreservice` e `sageservice` **sobem de novo** (processos ativos, 87 MB e 139 MB de RSS). Mesmo com o `coreservice` rodando suspenso, 0 linhas de `ClearDataForGotaFun` em 30 s: o polling não volta. `am force-stop` nos dois os derruba e eles ficam parados (20 s).
+- **Limite da prova:** não há controle sem suspensão. O Downloader sobreviver não prova que a suspensão é a causa; só mostra que, com ela, o comportamento relatado não apareceu em 1 instalação e 1 reboot. Para provar, seria preciso reabilitar o `coreservice` (`pm unsuspend`) e repetir a instalação de outro app.
+- Receita pós-boot: `am force-stop com.nes.coreservice; am force-stop com.tivo.sageservice`.
