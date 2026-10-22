@@ -25,7 +25,7 @@ O TiVo não foi fabricado pela TiVo. Quem fez foi a SEI Robotics, que usa a midd
 
 Hipóteses para confirmar no nosso aparelho:
 
-- [ ] O TiVo aceita `pm disable-user` ou recusa como o Nokia?
+- [x] O TiVo aceita `pm disable-user` ou recusa como o Nokia? **Recusa** (build 1272): `Warning! This command is illegal!`
 - [ ] Quais `com.nes.*` existem e quais são carga estrutural?
 - [ ] O `com.nes.coreservice` do TiVo faz as mesmas coisas que o do Nokia, mais a desinstalação?
 

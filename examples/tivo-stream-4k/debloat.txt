@@ -1,7 +1,8 @@
 # DRAFT - NOT TESTED. Candidates only; scripts/apply.sh refuses this file until this line is removed.
 #
 # TiVo Stream 4K (model IPA1104HDW, SKU RA2400, SEI Robotics, Amlogic S905Y2, NES middleware), 2 GB RAM
-# Android TV <10|12> (SDK <xx>), build <ro.build.fingerprint>          <- fill from scripts/probe.sh
+# Android TV 12 (SDK 31), 32-bit (armeabi-v7a), device SEI400TV, security patch 2025-07-05
+# Fingerprint: eSTREAM4K/SEI400TV/SEI400TV:12/SC/1272:user/release-keys
 #
 # Apply:   TV_HOST=<ip> tools/disable.sh examples/tivo-stream-4k/debloat.txt
 # Undo:    TV_HOST=<ip> tools/restore.sh examples/tivo-stream-4k/debloat.txt com.google.android.tvlauncher
@@ -11,8 +12,10 @@
 # A streaming stick: no HDMI inputs or tuner, leave live_tv_package empty in config.xml.
 #
 # Same ODM and middleware as examples/nokia-streaming-box-8000 and examples/dialog-viu-sei103dl.
-# On the Nokia, every pm disable* was refused ("This command is illegal!") and tvlauncher could not
-# lose HOME (priority 2). Check both on the TiVo before anything else.
+# CONFIRMED on build 1272: pm disable-user is refused ("Warning! This command is illegal!"), as on
+# the Nokia, so tools/disable.sh does not work here; use suspend + appops (scripts/apply.sh does it).
+# Still to check: whether tvlauncher can lose HOME (it could not on the Nokia, priority 2).
+# The saved Wi-Fi belongs to android.uid.system, not setupwraith.
 #
 # Known quirk on this firmware (Android 12 OTA): com.nes.coreservice uninstalls custom launchers,
 # Downloader and ADB tools right after install (AFTVnews, 2024). On the Nokia it also drives the LED,

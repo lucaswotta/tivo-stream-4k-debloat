@@ -33,7 +33,7 @@ O objetivo aqui não é "deixar mais potente" (o chip continua o mesmo), e sim *
 | Fabricante real (ODM) | SEI Robotics (FCC ID `2AOVU-IPA1104HDW`) |
 | SoC | Amlogic S905Y2 — 4× Cortex-A53, GPU Mali-G31 MP2 |
 | RAM / armazenamento | 2 GB / 8 GB |
-| Sistema | Android TV (10 ou 12 — **confirmar no probe**) com launcher clássico `com.google.android.tvlauncher` |
+| Sistema | Android TV 12 (build 1272, SDK 31), launcher clássico `com.google.android.tvlauncher` |
 | Middleware | NES (pacotes `com.nes.*`), a mesma do Nokia Streaming Box 8000 e do Dialog ViU |
 
 Detalhes e o porquê de cada linha em [docs/00-hardware.md](docs/00-hardware.md).
