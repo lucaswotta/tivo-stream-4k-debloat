@@ -56,3 +56,25 @@ Linhas de log por minuto, por processo (top, repouso):
 - Soma de RSS dos três: ~178 MB de 2 GB.
 - Nenhuma alteração feita no aparelho nesta etapa (só leitura).
 - **Próximo:** testar `pm suspend` + `appops` em `sageservice` e `daemon` (menor risco), depois `coreservice`, medindo `MemAvailable` e logs antes e depois.
+
+## 2026-10-22 — Lote NES: suspend + appops em sageservice, daemon e coreservice
+
+Método por pacote: `pm suspend --user 0`, `cmd appops set <pkg> RUN_ANY_IN_BACKGROUND ignore`, `am force-stop`. Todos retornaram sucesso. `apply.sh` não foi usado porque tenta `uninstall --user 0` antes de `suspend`, e o lote pedia só o método reversível mais fraco.
+
+Linha de base (`scripts/bench.sh`, 3 rodadas, mediana, sem reboot) e depois de `sageservice` + `daemon`:
+
+| Métrica | Antes | Depois do lote 1 |
+|---|---|---|
+| `MemAvailable` | 976 MB | 990 MB |
+| Processos | 314 | 315 |
+| YouTube a frio | 507 ms | 439 ms |
+| Netflix a frio | 529 ms | 521 ms |
+| Prime a frio | 785 ms | 646 ms |
+
+A diferença de memória (14 MB) e de tempos está dentro da variação entre rodadas (976 a 990 MB só na linha de base); não é ganho comprovado.
+
+- `com.nes.daemon` é `PERSISTENT`: `force-stop` não o derruba (PID 4523 inalterado) e ele segue com ~3 linhas de log/min. Suspender não o para. Efeito prático: nenhum.
+- Reboot (volta em ~43 s): `suspended=true` e `RUN_ANY_IN_BACKGROUND: ignore` **sobrevivem**, mas `com.tivo.sageservice` **sobe sozinho** após o boot (PID novo, 131 MB de RSS), via `AutoStartBroadcastReceiver`. Um `am force-stop` depois do boot o derruba e ele não volta em 20 s. Ou seja, o `suspend` não impede o receiver de boot (limite já previsto em 04-debloat). Sem root, não há automação no próprio aparelho; fica como passo pós-boot.
+- `com.nes.coreservice` suspenso: em 90 s, **0** linhas de `ClearDataForGotaFun` e 0 de `SystemUpdateManagerService` (antes: 180 em 180 s cada). O processo não voltou. `MemAvailable` medido logo após o boot: 957 MB (não comparável com a linha de base sem reboot).
+- **Não verificado:** efeito no LED frontal, no aviso de OTA e no controle, e se o `coreservice` ainda desinstala launchers (falta instalar um app para provar). Precisa de olho humano na TV.
+- **Próximo:** conferir LED, Home, volume/TV pelo controle e Wi-Fi; depois instalar o Downloader e ver se sobrevive.
