@@ -1,4 +1,4 @@
-# TiVo Stream 4K Lean
+# TiVo Stream 4K Debloat
 
 > Transformando um TiVo Stream 4K de 2020 num Android TV enxuto: sem propaganda, sem bloat, com cada mudança medida e reversível.
 
@@ -69,7 +69,7 @@ O diário de bordo, com data, comando e resultado de cada passo, fica em [docs/d
 ## Uso rápido (para o próximo dono de um TiVo Stream 4K)
 
 ```bash
-git clone https://github.com/lucaswotta/tivo-stream-4k-lean && cd tivo-stream-4k-lean
+git clone https://github.com/lucaswotta/tivo-stream-4k-debloat && cd tivo-stream-4k-debloat
 export TV_HOST=192.168.0.50          # IP do seu TiVo
 
 scripts/probe.sh                     # inventário do aparelho em runs/<data>/

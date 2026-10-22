@@ -22,7 +22,7 @@ Fluxo:
 gh repo fork Gathin23/cleanyourtv --clone
 cd cleanyourtv && git checkout -b add-tivo-stream-4k
 mkdir -p examples/tivo-stream-4k
-cp ../tivo-stream-4k-lean/examples/tivo-stream-4k/debloat.txt examples/tivo-stream-4k/
+cp ../tivo-stream-4k-debloat/examples/tivo-stream-4k/debloat.txt examples/tivo-stream-4k/
 # editar examples/README.md
 git commit -am "Add TiVo Stream 4K (SEI Robotics, NES)" && gh pr create
 ```
