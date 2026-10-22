@@ -11,6 +11,7 @@ connect
 restore() {
   local p="$1"
   valid_pkg "$p" || return 0
+  sh_tv cmd package install-existing "$p" >/dev/null 2>&1 || true
   sh_tv pm enable "$p" >/dev/null 2>&1 || true
   sh_tv pm unsuspend --user 0 "$p" >/dev/null 2>&1 || true
   sh_tv cmd appops reset --user 0 "$p" >/dev/null 2>&1 || true

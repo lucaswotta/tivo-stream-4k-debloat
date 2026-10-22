@@ -29,14 +29,21 @@ while IFS=$'\t' read -r group pkg; do
 
   if [[ -n "${DRY_RUN:-}" ]]; then echo "[dry-run] $group :: $pkg"; continue; fi
 
+  # Strongest reversible method first. This firmware refuses disable-user and refuses uninstall for
+  # "core" apps, so each package falls through: disable-user -> uninstall --user 0 -> suspend + appops.
   out="$(sh_tv pm disable-user --user 0 "$pkg" 2>&1 || true)"
   if grep -qi 'new state: disabled' <<<"$out"; then
     method=disable
   else
-    sh_tv pm suspend --user 0 "$pkg" >/dev/null 2>&1 || true
-    sh_tv cmd appops set "$pkg" RUN_ANY_IN_BACKGROUND ignore >/dev/null 2>&1 || true
-    sh_tv am force-stop "$pkg" >/dev/null 2>&1 || true
-    method="suspend (disable recusado: ${out//$'\n'/ })"
+    out="$(sh_tv pm uninstall -k --user 0 "$pkg" 2>&1 || true)"
+    if grep -qx 'Success' <<<"$out"; then
+      method="uninstall --user 0 (volta com install-existing)"
+    else
+      sh_tv pm suspend --user 0 "$pkg" >/dev/null 2>&1 || true
+      sh_tv cmd appops set "$pkg" RUN_ANY_IN_BACKGROUND ignore >/dev/null 2>&1 || true
+      sh_tv am force-stop "$pkg" >/dev/null 2>&1 || true
+      method="suspend + appops (${out//$'\n'/ })"
+    fi
   fi
   echo "$(date +%T) $group :: $pkg -> $method" | tee -a "$LOG"
 done < <(list_packages "$LIST")

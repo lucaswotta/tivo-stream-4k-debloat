@@ -13,25 +13,41 @@
 #
 # Same ODM and middleware as examples/nokia-streaming-box-8000 and examples/dialog-viu-sei103dl.
 # CONFIRMED on build 1272: pm disable-user is refused ("Warning! This command is illegal!"), as on
-# the Nokia, so tools/disable.sh does not work here; use suspend + appops (scripts/apply.sh does it).
-# Still to check: whether tvlauncher can lose HOME (it could not on the Nokia, priority 2).
+# the Nokia, and pm hide needs MANAGE_USERS. pm uninstall -k --user 0 WORKS for non-core packages
+# (undo: cmd package install-existing); core apps refuse it and get pm suspend + appops instead.
+# TV Settings > Apps > Disable still works for some core apps (it runs as system).
+# HOME claimants: com.google.android.tvlauncher (priority 2) and Settings FallbackHome only, the
+# same as the Nokia. A sideloaded launcher cannot win HOME; try the launcher's HOME_KEY_SERVICE.
 # The saved Wi-Fi belongs to android.uid.system, not setupwraith.
 #
 # Known quirk on this firmware (Android 12 OTA): com.nes.coreservice uninstalls custom launchers,
 # Downloader and ADB tools right after install (AFTVnews, 2024). On the Nokia it also drives the LED,
 # OTA messages and an analytics receiver, so watch for side effects after disabling it.
 #
-# Kept on purpose (expected from the SEI/NES cousins, confirm with dumpsys package):
-#   com.nes.blerc                 Bluetooth remote and pairing
-#   com.nes.tvglobalkeyhandler    remote shortcut buttons (Netflix, Guide, Live, TiVo)
+# Kept on purpose (confirm with dumpsys package):
+#   com.nes.tivo.remote.pair      Bluetooth remote pairing
+#   com.uei.uas.tivo              UEI QuickSet: TV power/volume from the TiVo remote (IR)
+#   com.sei.hdmi.services         HDMI-CEC
+#   com.google.android.tvsetup.partnercustomizer
 #   com.droidlogic.*              Amlogic vendor: HDMI-CEC, picture, sleep timer
 #   Play Store, Play Services, keyboard, com.google.android.katniss (mic), mediashell (Chromecast)
+
+# Already removed by the owner before this project (uninstall --user 0), listed so a fresh box ends
+# in the same place. Re-check the remote shortcut buttons: tvglobalkeyhandler drives them on the cousins.
+com.tivo.atom                                   # TiVo Stream app; TiVo's service does not work in Brazil
+com.tivo.tivoplusplayer                         # TiVo+ free channels
+com.tivo.tvlaunchercustomization                # TiVo rows/branding for the stock launcher
+com.nes.skywayclient                            # NES device manager: boot ads, silent installs, firmware check
+com.nes.tvglobalkeyhandler                      # remote shortcut keys (verify what still works)
+com.utsmta.app                                  # NES factory test app
+com.google.android.play.games
+com.google.android.youtube.tvmusic              # disabled from TV Settings
 
 # Telemetry and feedback
 com.google.android.feedback
 com.google.android.partnersetup                 # Google RLZ partner attribution pings
 com.google.android.tv.bugreportsender
-com.nes.tvbugtracker                            # NES bug tracker (Dialog ViU), may not exist here
+com.nes.tvbugtracker                            # NES bug tracker, present on this box
 
 # App blocker
 com.nes.coreservice                             # uninstalls launchers/ADB tools; see docs/03-coreservice.md
@@ -40,18 +56,12 @@ com.nes.coreservice                             # uninstalls launchers/ADB tools
 com.google.android.tvrecommendations
 com.nes.leanbacklauncher.partnercustomizer      # Shop/Discover rows config (Nokia)
 android.autoinstalls.config.sei                 # Play auto-install of partner apps
-# com.nes.skywayclient                          # boot ads + silent installs (Dialog), firmware check (Nokia): test last
 
-# Factory leftovers
-com.utsmta.app                                  # NES factory test app, listens for USB sticks
 
 # Preloaded apps, off by choice
-com.google.android.play.games
 com.android.printspooler
 com.google.android.marvin.talkback              # re-enable if you need the screen reader
-com.google.android.youtube.tvmusic
 # com.google.android.videos                     # Play Movies & TV, still pinned on this box's favourites
-# com.tivo.atom                                 # TiVo Stream app (guide/aggregator): confirm name with probe
 
 # Stock home. Disable only after the new launcher is installed and owns HOME.
 # com.google.android.tvlauncher
