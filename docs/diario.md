@@ -142,3 +142,23 @@ Método igual nos dois lados: `bench.sh --boot --runs 3` (reboot, 180 s de esper
 - A contagem de `ClearDataForGotaFun` sem suspensão não foi refeita nesta rodada (o comando foi cortado por `timeout`); vale a medição anterior: 180 em 180 s.
 - Lista reaplicada: os 10 pacotes `suspended=true` de novo, `force-stop` em `coreservice` e `sageservice`.
 - **Conclusão:** o benefício real do projeto, até aqui, é privacidade e menos atividade de fundo, não velocidade. O ganho de velocidade, se houver, virá do launcher novo (Fase 4) e da troca da home.
+
+## 2026-10-22 — Fase 4, leitura prévia, e teste de compilação AOT
+
+Estado de desempenho medido antes de mexer: `MemAvailable` ~1,07 GB em repouso (`dumpsys meminfo`: 863 MB livres/cache), `/data` com 995 MB livres de 4,1 GB, CPU `interactive` a 1,6 GHz, animações já em `window=0`, `transition=0`, `animator=0.5` (ajuste anterior do dono). Apps de vídeo já em `speed-profile` por `bg-dexopt`/`install-dm`. Maiores consumidores: `gms` 145 MB, `system` 118 MB, `tvlauncher` 81 MB, `vending` 63 MB, `katniss:interactor` 60 MB.
+
+Teste de AOT: `cmd package compile -m speed -f` em `tvlauncher`, YouTube, Netflix e Prime (3 rodadas de `bench.sh` antes e depois; ~70 MB de disco).
+
+| App | `speed-profile` | `speed` |
+|---|---|---|
+| YouTube | 538 ms | 628 ms |
+| Netflix | 527 ms | 553 ms |
+| Prime | 691 ms | 752 ms |
+
+Pior, não melhor. Revertido com `compile -m speed-profile -f` nos 4 apps (status confirmado `speed-profile`, razão `cmdline`). `compile --reset` falha para o shell (`Only the system can clear all profile data`).
+
+Achados para a troca de launcher:
+- `tvrecommendations` está suspenso mas **rodando** (PID novo, 37 a 131 MB): o `tvlauncher` o religa. Suspender não impede um processo que outro app vincula; só `force-stop` e o launcher o religa de novo.
+- Esta build (Android 12) não tem `cmd role get-role-holders`; HOME é decidido por `set-home-activity` (preferred activity). `tvlauncher` tem prioridade 2 e é app de sistema atualizado (`UPDATED_SYSTEM_APP`, `PRIVILEGED`).
+- `free-my-tv` (`HomeMode.restoreHome`) usa `set-home-activity` e, como reversão, `cmd package set-home-activity <stock>`; no Android 9/12 sem `cmd role` o `remove-role-holder` não existe.
+- A máquina de desenvolvimento só tem JDK 25 e não tem Android SDK. O launcher do `cleanyourtv` pede JDK 17, SDK 34 e Gradle; compilar exige baixar essas ferramentas.
