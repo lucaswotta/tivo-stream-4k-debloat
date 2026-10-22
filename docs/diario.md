@@ -99,3 +99,25 @@ A diferença de memória (14 MB) e de tempos está dentro da variação entre ro
 - `google.android.tvrecommendations` e `android.autoinstalls.config.sei` ficaram `suspend + appops` (core, recusam `uninstall`). `nes.leanbacklauncher.partnercustomizer` não existe nesta build.
 - Depois do lote: `KEYCODE_HOME` abre `com.google.android.tvlauncher/.MainActivity` em foco, buffer `crash` vazio, sem `FATAL` nem `ANR` no log.
 - **Falta:** o dono conferir a home (linhas de recomendação) e o reboot.
+
+## 2026-10-22 — Lote 4, benchmark final e fechamento da lista
+
+- Dono conferiu depois do lote 3: home e controle normais. Lote 4 (`printspooler`, `talkback`) aplicado; Home em foco, sem crash.
+- Todos os 10 pacotes suspensos continuam `suspended=true` e `RUN_ANY_IN_BACKGROUND: ignore` depois de 4 reboots (os 3 do bench com `--boot` mais o do teste do Downloader).
+- Bench com reboot (3 rodadas, mediana): boot 48 s, `MemAvailable` 920 MB, 330 processos (`coreservice` e `sageservice` reiniciados pelo boot).
+- Bench sem reboot, depois de `am force-stop` nos dois (3 rodadas, mediana):
+
+| Métrica | Linha de base | Depois | Δ |
+|---|---|---|---|
+| `MemAvailable` | 976 MB | 1058 MB | +82 MB |
+| Processos | 314 | 310 | -4 |
+| Pacotes habilitados | 102 | 102 | 0 |
+| PSS do launcher | 104 MB | 68 MB | -36 MB |
+| YouTube a frio | 507 ms | 521 ms | +14 ms |
+| Netflix a frio | 529 ms | 504 ms | -25 ms |
+| Prime a frio | 785 ms | 689 ms | -96 ms |
+
+- **Limite da comparação:** a linha de base foi medida com o aparelho ligado há horas; "depois" vem logo depois de um reboot. Parte do ganho de memória e do PSS do launcher pode ser só boot recente. Os tempos de abertura estão dentro da variação (YouTube pior, Netflix e Prime melhores). O ganho seguro é o polling de 1/s a zero e os serviços parados; o resto precisa de uma segunda linha de base após reboot sem as suspensões (`rollback.sh`, reboot, `bench.sh`).
+- `packages_enabled` não muda porque suspender não desabilita.
+- `debloat.txt` sem a marca DRAFT: toda linha ativa foi aplicada e testada neste aparelho (uma unidade, um dia). `tvlauncher` continua fora, sem launcher novo.
+- **Próximo:** comparação limpa pós-reboot (sem as suspensões) e Fase 4, launcher novo (HOME `priority 2`; ver [09](09-referencias.md)).

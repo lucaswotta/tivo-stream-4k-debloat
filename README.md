@@ -4,7 +4,7 @@
 
 ![TiVo Stream 4K, controle e cabo](docs/img/aparelho.jpg)
 
-**Status:** 🟡 Fase 0 — documentação e preparação. Nada foi alterado no aparelho ainda.
+**Status:** Fases 1 a 3 feitas em uma unidade: 10 pacotes suspensos, nada desinstalado por este projeto. Launcher novo ainda não.
 
 ---
 
