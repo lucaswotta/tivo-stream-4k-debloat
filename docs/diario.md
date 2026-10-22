@@ -86,3 +86,9 @@ A diferença de memória (14 MB) e de tempos está dentro da variação entre ro
 - Pós-reboot: os três pacotes seguem `suspended=true`, mas `coreservice` e `sageservice` **sobem de novo** (processos ativos, 87 MB e 139 MB de RSS). Mesmo com o `coreservice` rodando suspenso, 0 linhas de `ClearDataForGotaFun` em 30 s: o polling não volta. `am force-stop` nos dois os derruba e eles ficam parados (20 s).
 - **Limite da prova:** não há controle sem suspensão. O Downloader sobreviver não prova que a suspensão é a causa; só mostra que, com ela, o comportamento relatado não apareceu em 1 instalação e 1 reboot. Para provar, seria preciso reabilitar o `coreservice` (`pm unsuspend`) e repetir a instalação de outro app.
 - Receita pós-boot: `am force-stop com.nes.coreservice; am force-stop com.tivo.sageservice`.
+
+## 2026-10-22 — Lote 2: telemetria e feedback
+
+- Bug em `scripts/apply.sh`: o `adb shell` dentro do `while read` consumia o stdin do laço e só o primeiro pacote era processado. Corrigido em `_lib.sh` (`</dev/null` em `sh_tv`); commit separado.
+- Aplicado com `FORCE_DRAFT=1 scripts/apply.sh ... --only "Telemetry and feedback"`: `google.android.feedback`, `google.android.partnersetup` e `nes.tvbugtracker` ficaram `suspended=true` (todos recusam `uninstall --user 0` por serem core). `tv.bugreportsender` não existe nesta build.
+- **Falta:** teste com o controle e reboot.
