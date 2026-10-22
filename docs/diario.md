@@ -327,3 +327,4 @@ Primeira tentativa inválida: o `push-theme.sh` falhou nas três variantes por f
 - `v2` ainda tira ~2 MB de PSS e deixa praticamente um quadro por toque, também sem mudar o número de quadros travados: parecem ser fixos, ~3 por passada, e provavelmente são os movimentos verticais (DOWN e UP, 6 por passada) que rolam a página inteira.
 - Nenhuma variante foi aplicada ao tema do repositório. Estado final do aparelho: `v0` (o tema atual), serviços de tecla ligados.
 - **Conclusão:** o launcher já está leve (24 a 26 MB de PSS, ~0,5% de quadros travados, abrindo em ~0,4 s). `reduced_motion` poupa trabalho de GPU e deixa o movimento mais seco; os outros ajustes valem 1 a 2 MB.
+- **Aplicado a pedido do dono:** `"reduced_motion": true` em `examples/tivo-stream-4k/theme/config.json`, enviado por `scripts/push-theme.sh` (serviços de tecla religados e conferidos). Para desfazer: apagar a linha e rodar o script de novo.
