@@ -312,3 +312,18 @@ A abertura da Netflix variou entre as medições (511 e 653 ms) sem que nada nel
 - Solução: `AssistActivity` em `homekey/` (filtro `ACTION_ASSIST`, abre a Play Store e termina) e `settings put secure assistant dev.lucaswotta.homekey/.AssistActivity`. Botão real: abriu a Play Store. O `bootclean` passou a gravar esse setting no lugar de esvaziá-lo.
 - Um toque dado com 1 minuto de uptime não funcionou: a primeira execução do `bootclean` era 60 s depois do boot e, até lá, o Android deixa o Katniss como assistente. Passou a rodar também na hora do `BOOT_COMPLETED`: com ~48 s de uptime o setting já estava correto (`bootclean` iniciou às 20:23:01 e parou o `coreservice` 0,7 s depois).
 - `homekey` ganhou `<queries>` para `com.android.vending` e uma `Activity` exportada sem permissão nova.
+
+## 2026-10-22 — Dá para deixar o launcher mais leve sem baixar a resolução?
+
+Primeira tentativa inválida: o `push-theme.sh` falhou nas três variantes por falta de `TV_HOST` no ambiente do script de medição, então mediu o mesmo tema três vezes. Serviu só para ver o ruído: com configuração idêntica, o p90 do quadro foi de 16 a 27 ms e a abertura a frio de 414 a 634 ms. Refeita com o `TV_HOST` exportado, 3 passadas por variante (24 toques de D-pad por passada, `dumpsys gfxinfo`), mais um `v0` no final para checar deriva.
+
+| Variante | Quadros por passada | Quadros travados por passada | Mediana do quadro | PSS do launcher | Abertura a frio |
+|---|---|---|---|---|---|
+| `v0` tema atual | ~650 | 3 a 4 | 6 a 7 ms | 25,8 MB | 410 a 465 ms |
+| `v1` + `reduced_motion` | ~125 | 0 a 5 | 14 ms | 24,4 MB | 416 a 427 ms |
+| `v2` + `animations`, `focus_overshoot`, `module_cards`, `ambient_glow` desligados | ~21 | 1 a 3 | 7 ms | 23,5 MB | 408 a 430 ms |
+
+- `reduced_motion` renderiza ~80% menos quadros (a animação do foco termina em 5 quadros em vez de deslizar), então o trabalho total de GPU e CPU na navegação cai (cerca de 650 quadros de 6 a 7 ms contra 125 de 14 ms por passada), mas o **número absoluto de quadros travados não mudou** (2 a 5 contra 3 a 4) e a abertura a frio é igual. A porcentagem de quadros travados piora porque o denominador encolhe, então ela não serve para comparar as variantes.
+- `v2` ainda tira ~2 MB de PSS e deixa praticamente um quadro por toque, também sem mudar o número de quadros travados: parecem ser fixos, ~3 por passada, e provavelmente são os movimentos verticais (DOWN e UP, 6 por passada) que rolam a página inteira.
+- Nenhuma variante foi aplicada ao tema do repositório. Estado final do aparelho: `v0` (o tema atual), serviços de tecla ligados.
+- **Conclusão:** o launcher já está leve (24 a 26 MB de PSS, ~0,5% de quadros travados, abrindo em ~0,4 s). `reduced_motion` poupa trabalho de GPU e deixa o movimento mais seco; os outros ajustes valem 1 a 2 MB.
