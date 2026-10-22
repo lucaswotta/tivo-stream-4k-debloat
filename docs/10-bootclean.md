@@ -4,12 +4,12 @@
 
 ## O problema
 
-`pm suspend`, `appops` e `killBackgroundProcesses` (chamado por um app) não impedem o boot de religar `com.nes.coreservice`, `com.tivo.sageservice`, `com.google.android.tvlauncher`, `com.google.android.katniss` e `com.google.android.tvrecommendations`. Só `am force-stop` pelo shell os derruba, e o shell só existe no ADB. Esta build não tem permissão de início automático (`AUTO_START` e semelhantes não existem em `cmd appops`).
+`pm suspend`, `appops` e `killBackgroundProcesses` (chamado por um app) não impedem o boot de religar `com.nes.coreservice`, `com.tivo.sageservice`, `com.google.android.tvlauncher`, `com.google.android.katniss`, `com.google.android.tvrecommendations` e `com.nes.tvbugtracker`. Só `am force-stop` pelo shell os derruba, e o shell só existe no ADB. Esta build não tem permissão de início automático (`AUTO_START` e semelhantes não existem em `cmd appops`).
 
 ## O que ele faz
 
 1. `BootReceiver` recebe `BOOT_COMPLETED` e agenda três execuções (`JobScheduler`) 60, 150 e 300 s depois, quando os serviços já subiram.
-2. `CleanJob` conecta ao `adbd` da própria TV em `127.0.0.1:5555`, autentica com uma chave RSA própria e roda comandos fixos: limpa os settings `assistant` e `voice_interaction_service` (o Android os preenche com o Katniss a cada boot, e enquanto ele é o Assistente registrado o sistema mantém o processo `katniss:interactor` vivo) e dá `am force-stop` nos cinco pacotes.
+2. `CleanJob` conecta ao `adbd` da própria TV em `127.0.0.1:5555`, autentica com uma chave RSA própria e roda comandos fixos: limpa os settings `assistant` e `voice_interaction_service` (o Android os preenche com o Katniss a cada boot, e enquanto ele é o Assistente registrado o sistema mantém o processo `katniss:interactor` vivo) e dá `am force-stop` nos seis pacotes.
 3. O cliente ADB (`Adb.java`) é adaptado do `free-my-tv` (MIT, licença em `bootclean/LICENSE-free-my-tv`).
 
 ## O `tvrecommendations`

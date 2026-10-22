@@ -21,6 +21,7 @@ public class CleanJob extends JobService {
         "com.tivo.sageservice",
         "com.google.android.tvlauncher",
         "com.google.android.katniss",
+        "com.nes.tvbugtracker",
         // Its notification listener is switched off (cmd notification disallow_listener, which survives a
         // reboot), so nothing holds it after a force-stop except a content provider query at boot.
         "com.google.android.tvrecommendations",
