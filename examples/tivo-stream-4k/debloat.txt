@@ -1,4 +1,6 @@
-# DRAFT - NOT TESTED. Candidates only; scripts/apply.sh refuses this file until this line is removed.
+# Tested 2026-10-22 on one unit, with 4 reboots and a day of use by the owner (not a multi-day soak). Every active
+# line below was applied by scripts/apply.sh as suspend + appops; the other 5 packages were removed by the owner earlier.
+# After each boot run: am force-stop com.nes.coreservice com.tivo.sageservice (they restart at boot, suspended).
 #
 # TiVo Stream 4K (model IPA1104HDW, SKU RA2400, SEI Robotics, Amlogic S905Y2, NES middleware), 2 GB RAM
 # Android TV 12 (SDK 31), 32-bit (armeabi-v7a), device SEI400TV, security patch 2025-07-05
@@ -46,10 +48,11 @@ com.google.android.youtube.tvmusic              # disabled from TV Settings
 # Telemetry and feedback
 com.google.android.feedback
 com.google.android.partnersetup                 # Google RLZ partner attribution pings
-com.google.android.tv.bugreportsender
+com.google.android.tv.bugreportsender       # absent on build 1272, harmless
 com.nes.tvbugtracker                            # NES bug tracker, present on this box
 
-# App blocker and NES background services. Measured 2026-10-22 at idle (docs/diario.md): coreservice polls
+# App blocker and NES services
+# Measured 2026-10-22 at idle (docs/diario.md): coreservice polls
 # update status 1x/s (61 log lines/min, 49 MB RSS) and holds DELETE_PACKAGES/CLEAR_APP_USER_DATA; daemon
 # (PERSISTENT) loops checking the removed skywayclient (41 MB); sageservice (TiVo, 88 MB) is unused here.
 # All three are core: suspend + appops, tested 2026-10-22 (LED, remote, Wi-Fi, YouTube fine; Downloader stayed
@@ -61,7 +64,7 @@ com.tivo.sageservice                            # TiVo service, no use outside t
 
 # Recommendations, partner rows and auto-installs
 com.google.android.tvrecommendations
-com.nes.leanbacklauncher.partnercustomizer      # Shop/Discover rows config (Nokia)
+com.nes.leanbacklauncher.partnercustomizer      # absent on build 1272, kept for the Nokia/Dialog cousins
 android.autoinstalls.config.sei                 # Play auto-install of partner apps
 
 
