@@ -34,6 +34,16 @@ Consequências medidas em 2026-10-22:
 - **Um app que não declara HOME é ignorado.** O `homelite` sem a categoria sobreviveu a um boot completo com o `coreservice` rodando, com 0 chamadas de `uninstallAsUser` para ele.
 - Um serviço de acessibilidade abre o launcher pela tecla Home (ver [05](05-launcher.md)); por isso o launcher não precisa da categoria.
 
+### A lista fixa de 53 pacotes
+
+No boot, `EvoBlackListAppsFun` chama `uninstallAsUser` para 53 nomes de pacote, instalados ou não (registro do log de 2026-10-22). Grupos:
+- **Launchers alternativos:** `me.efesser.flauncher`, `com.izyver.fllauncher`, `com.spocky.projengmenu`, `com.teslacoilsw.launcher`, `com.anddoes.launcher`, `ca.dstudio.atvlauncher.free`/`.pro`, `studio.scillarium.stblauncher`, `eu.chainfire.tv.sideloadlauncher`, `org.cosinus.launchertv`, `com.vnapps.tvlauncher` e outros.
+- **Instaladores e ferramentas de ADB:** `com.esaba.downloader` (Downloader), `ru.aaaaaaci.installer`, `com.cybercat.adbappcontrol.tv`, `com.topjohnwu.magisk`.
+- **IPTV e variantes de "Magis TV":** cerca de 25 nomes (`com.magistv.magistv`, `com.android.mgstv`, ...), mais `com.hbo.hbonow` e `com.disney.starplus`.
+- Fora da lista: Navegador Web (`com.internet.tvbrowser`) e TVExpress BR (`com.livetv.tve`) não constam e foram desinstalados pelo próprio dono.
+
+Consequência: **o Downloader é removido a cada boot em que o `coreservice` roda.** O `coreservice` suspenso ainda sobe no boot (receiver), então reiniciar a TV com ele ativo remove os apps da lista. `scripts/post-boot.sh` não ajuda, porque a remoção acontece nos primeiros ~35 s, antes de o ADB responder.
+
 ## Por que não aplicar às cegas
 
 No Nokia Streaming Box 8000 (mesma fabricante e middleware), o `com.nes.coreservice` foi **mantido** porque concentra o LED frontal, mensagens de OTA e um receptor de analytics. Então desabilitar pode ter efeito colateral. A investigação existe para descobrir qual.
