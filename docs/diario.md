@@ -207,3 +207,27 @@ Medição com o Home Lite (reboot, 130 s, `post-boot.sh`, 3 rodadas de `bench.sh
 
 - **Limite da comparação:** a coluna da esquerda foi medida ~3 min depois do boot e a da direita alguns minutos mais tarde, com `coreservice`, `sageservice` e `tvlauncher` parados à força. Parte da diferença é o tempo de assentamento do sistema depois do boot, não só o launcher. Contra a medição sem reboot (YouTube 538 ms, Netflix 527 ms, Prime 691 ms), as aberturas a frio ficaram iguais: o ganho firme é memória, não latência.
 - **Aberto:** um segundo boot não foi medido com `post-boot.sh` automatizado; o script é manual. Teclas TiVo, Guide e Live, protetor de tela e Downloader (não aparece na grade) seguem pendentes.
+
+## 2026-10-22 — Troca para o launcher do cleanyourtv
+
+- Dono pediu o launcher do `cleanyourtv`. O protótipo próprio tinha dois problemas reais: **foco quebrado** (o `GridView` com seletor transparente movia uma seleção invisível; D-pad e OK não chegavam aos tiles, reproduzido por captura de tela) e visual simples. O redesenho que eu começava foi descartado sem compilar.
+- Build: `scripts/build-launcher.sh` busca o commit fixado `30626a8`, aplica `launcher/home-category.patch` (remove a categoria HOME do `intent-filter`) e roda o Gradle do projeto. O wrapper baixou o Gradle 8.9 conferindo o SHA-256 que o projeto fixa. Primeiro erro: `Unsupported class file major version 69`, porque o `JAVA_HOME` do shell era um Java 25; o script agora fixa o JDK 17 do toolchain.
+- APKs: `launcher/cleanyourtv.apk` 482 KB (permissões do upstream: rede, Wi-Fi, localização, `WRITE_SECURE_SETTINGS`, `yandex...ACCESS_TV_SOURCE`) e `homekey/HomeKey.apk` 12,8 KB sem permissões. Instalados por `scripts/install-launcher.sh`, que removeu o protótipo e reabilitou o serviço.
+- Conferido em captura: fundo vermelho com Netflix em foco, e verde-azulado em "Send Files To TV"; D-pad, foco ampliado, nome do app em foco e rolagem entre linhas funcionam.
+- Reboot com `coreservice` ativo: launcher e serviço seguem instalados, Home abre o launcher sozinha, 0 tentativas de desinstalação dele.
+
+Medição (reboot, 130 s, `post-boot.sh`, 3 rodadas de `bench.sh`, mediana):
+
+| Métrica | Original + suspensões | cleanyourtv + `post-boot.sh` |
+|---|---|---|
+| `MemAvailable` | 920 MB | 1060 MB (1ª rodada 866 MB com uso da TV; 1060 e 1062 depois) |
+| PSS do launcher | 64 MB | 21 MB |
+| Processos | 330 | 317 |
+| YouTube a frio | 673 ms | 526 ms |
+| Netflix a frio | 775 ms | 511 ms |
+| Prime a frio | 1479 ms | 655 ms |
+
+Mesmo limite de antes: a coluna da esquerda foi medida logo após o boot e a da direita alguns minutos depois, com `coreservice`, `sageservice` e `tvlauncher` parados à força. O ganho firme é de memória.
+
+**Apps que sumiram.** O dono reportou falta de apps. Pacotes de usuário antes: `tvbrowser`, `nextapp.fx`, `sendfilestotv`, `livetv.tve`, `unitviptv`, mais o Downloader instalado depois. Agora: `unitviptv`, `sendfilestotv`, `nextapp.fx`. O log mostra `tvbrowser` e `livetv.tve` removidos pelo fluxo interativo (launcher > Informações do app > `UNINSTALL_PACKAGE` do instalador de pacotes, a 11 s um do outro); o dono confirmou que apagou os dois. O Downloader consta na lista fixa do `coreservice` ([03](03-coreservice.md)) e não aparece no log do boot atual (já havia sumido); sem log do período anterior não dá para dizer se foi o dono ou o `coreservice` num dos reboots de 17:10 a 17:24, quando o `coreservice` estava sem suspensão para a comparação de benchmark. Aberto.
+- **Pendente:** teclas TiVo, Guide e Live; protetor de tela; Downloader (a lista de remoção do `coreservice` o inclui, então não sobrevive a reboot); `config.xml`/tema do launcher.

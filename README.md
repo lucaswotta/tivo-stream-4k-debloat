@@ -4,7 +4,7 @@
 
 ![TiVo Stream 4K, controle e cabo](docs/img/aparelho.jpg)
 
-**Status:** Fases 1 a 4 feitas em uma unidade: 10 pacotes suspensos, nada desinstalado por este projeto, launcher próprio de 17 KB como Home pelo botão do controle.
+**Status:** Fases 1 a 4 feitas em uma unidade: 10 pacotes suspensos, nada desinstalado por este projeto, launcher do cleanyourtv (patch de uma linha) como Home pelo botão do controle.
 
 ---
 
@@ -79,7 +79,8 @@ scripts/bench.sh antes               # linha de base
 scripts/apply.sh examples/tivo-stream-4k/debloat.txt
 scripts/bench.sh depois
 scripts/rollback.sh examples/tivo-stream-4k/debloat.txt   # desfaz tudo
-scripts/install-launcher.sh --build     # launcher próprio como Home (docs/05-launcher.md)
+scripts/build-launcher.sh               # compila o launcher e o serviço da tecla Home
+scripts/install-launcher.sh             # instala os dois (docs/05-launcher.md)
 scripts/post-boot.sh                    # depois de cada boot, ~2 min após ligar
 ```
 
