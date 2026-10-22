@@ -4,8 +4,8 @@
 # Android TV 12 (SDK 31), 32-bit (armeabi-v7a), device SEI400TV, security patch 2025-07-05
 # Fingerprint: eSTREAM4K/SEI400TV/SEI400TV:12/SC/1272:user/release-keys
 #
-# Apply:   TV_HOST=<ip> tools/disable.sh examples/tivo-stream-4k/debloat.txt
-# Undo:    TV_HOST=<ip> tools/restore.sh examples/tivo-stream-4k/debloat.txt com.google.android.tvlauncher
+# Apply:   TV_HOST=<ip> scripts/apply.sh examples/tivo-stream-4k/debloat.txt
+# Undo:    TV_HOST=<ip> scripts/rollback.sh examples/tivo-stream-4k/debloat.txt
 # Everything is DISABLED, not uninstalled. Comment out any line you want to keep.
 #
 # Stock launcher: com.google.android.tvlauncher (classic Android TV, Home/Shop/Apps tabs).
@@ -49,8 +49,13 @@ com.google.android.partnersetup                 # Google RLZ partner attribution
 com.google.android.tv.bugreportsender
 com.nes.tvbugtracker                            # NES bug tracker, present on this box
 
-# App blocker
+# App blocker and NES background services. Measured 2026-10-22 at idle (docs/diario.md): coreservice polls
+# update status 1x/s (61 log lines/min, 49 MB RSS) and holds DELETE_PACKAGES/CLEAR_APP_USER_DATA; daemon
+# (PERSISTENT) loops checking the removed skywayclient (41 MB); sageservice (TiVo, 88 MB) is unused here.
+# All three are core: use suspend + appops, not tested yet. coreservice also owns LedReceiver, so watch the LED.
 com.nes.coreservice                             # uninstalls launchers/ADB tools; see docs/03-coreservice.md
+com.nes.daemon                                  # loops on the removed skywayclient and clears app data
+com.tivo.sageservice                            # TiVo service, no use outside the US
 
 # Recommendations, partner rows and auto-installs
 com.google.android.tvrecommendations

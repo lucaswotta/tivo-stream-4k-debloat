@@ -56,8 +56,8 @@ No Nokia Streaming Box 8000 (mesma fabricante e middleware), o `com.nes.coreserv
 
 | Item | Resultado |
 |---|---|
-| Versão do Android quando testado | — |
-| Componentes suspeitos | — |
+| Versão do Android quando testado | 12, build 1272 |
+| Componentes suspeitos | `ClearAppDataActivity` e permissões `DELETE_PACKAGES`/`CLEAR_APP_USER_DATA`/`INSTALL_PACKAGES` (uid `system`); `daemon` também tem as duas primeiras ([diário](diario.md)) |
 | Comando que funcionou | — |
 | Sobrevive a reboot? | — |
 | Efeitos colaterais | — |

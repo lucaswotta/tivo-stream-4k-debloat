@@ -64,6 +64,7 @@ Detalhes e o porquê de cada linha em [docs/00-hardware.md](docs/00-hardware.md)
 | 5 | Benchmark final + uso real por alguns dias | [06-benchmark](docs/06-benchmark.md) |
 | 6 | PR no cleanyourtv | [07-upstream](docs/07-upstream.md) |
 | — | Mapa do controle e botões remapeáveis | [08-controle](docs/08-controle.md) |
+| — | Repositórios de referência | [09-referencias](docs/09-referencias.md) |
 
 O diário de bordo, com data, comando e resultado de cada passo, fica em [docs/diario.md](docs/diario.md).
 
