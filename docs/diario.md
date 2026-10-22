@@ -92,3 +92,10 @@ A diferença de memória (14 MB) e de tempos está dentro da variação entre ro
 - Bug em `scripts/apply.sh`: o `adb shell` dentro do `while read` consumia o stdin do laço e só o primeiro pacote era processado. Corrigido em `_lib.sh` (`</dev/null` em `sh_tv`); commit separado.
 - Aplicado com `FORCE_DRAFT=1 scripts/apply.sh ... --only "Telemetry and feedback"`: `google.android.feedback`, `google.android.partnersetup` e `nes.tvbugtracker` ficaram `suspended=true` (todos recusam `uninstall --user 0` por serem core). `tv.bugreportsender` não existe nesta build.
 - **Falta:** teste com o controle e reboot.
+- Controle conferido pelo dono depois do lote 2: Home, volume, YouTube e Netflix normais.
+
+## 2026-10-22 — Lote 3: recomendações e auto-instalação
+
+- `google.android.tvrecommendations` e `android.autoinstalls.config.sei` ficaram `suspend + appops` (core, recusam `uninstall`). `nes.leanbacklauncher.partnercustomizer` não existe nesta build.
+- Depois do lote: `KEYCODE_HOME` abre `com.google.android.tvlauncher/.MainActivity` em foco, buffer `crash` vazio, sem `FATAL` nem `ANR` no log.
+- **Falta:** o dono conferir a home (linhas de recomendação) e o reboot.
