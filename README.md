@@ -65,6 +65,7 @@ Detalhes e o porquê de cada linha em [docs/00-hardware.md](docs/00-hardware.md)
 | 6 | PR no cleanyourtv | [07-upstream](docs/07-upstream.md) |
 | — | Mapa do controle e botões remapeáveis | [08-controle](docs/08-controle.md) |
 | — | Repositórios de referência | [09-referencias](docs/09-referencias.md) |
+| — | Limpeza automática depois do boot | [10-bootclean](docs/10-bootclean.md) |
 
 O diário de bordo, com data, comando e resultado de cada passo, fica em [docs/diario.md](docs/diario.md).
 
@@ -82,7 +83,7 @@ scripts/rollback.sh examples/tivo-stream-4k/debloat.txt   # desfaz tudo
 scripts/build-launcher.sh               # compila o launcher e o serviço da tecla Home
 scripts/install-launcher.sh             # instala os dois (docs/05-launcher.md)
 scripts/push-theme.sh                   # botões TiVo, Guide e Live (docs/08-controle.md)
-scripts/post-boot.sh                    # depois de cada boot, ~2 min após ligar
+scripts/post-boot.sh                    # só sem o bootclean: depois de cada boot, ~2 min após ligar
 ```
 
 > A lista em `examples/tivo-stream-4k/debloat.txt` foi testada em uma unidade (um dia de uso, 4 reboots). O launcher exige ferramentas de build em `~/.local/share/tivo-toolchain` (JDK 17 e Android SDK 34, ver `launcher/build.sh`).

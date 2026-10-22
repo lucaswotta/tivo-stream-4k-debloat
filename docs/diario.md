@@ -261,3 +261,25 @@ Medição (sem reboot, depois de `post-boot.sh`, 3 rodadas de `bench.sh`, median
 | Prime a frio | 655 ms | 655 ms |
 
 A abertura da Netflix variou entre as medições (511 e 653 ms) sem que nada nela tenha mudado: tratar como ruído, não como regressão. O ganho firme continua sendo de memória.
+
+## 2026-10-22 — Limpeza automática depois do boot (`bootclean`)
+
+- Investigação: sem permissão de início automático nesta build (`AUTO_START`, `BOOT_COMPLETED` e semelhantes não existem em `cmd appops`). O único caminho que sobra é um app falar com o `adbd` da própria TV em `127.0.0.1:5555`, como o `free-my-tv`. A criação foi bloqueada uma vez pelo sistema de permissões do agente (persistência) e só foi feita depois da autorização explícita do dono, que escolheu a opção com a chave ADB permanente. Detalhes e riscos em [10](10-bootclean.md).
+- APK separado do `homekey` de propósito: `INTERNET` mais um serviço que vê todas as teclas num pacote só seria uma combinação ruim.
+- Primeira execução: o aviso "Permitir depuração USB?" foi **negado em 0,2 s** (`AdbDebuggingManager: Denying adb confirmation`) porque o protetor de tela novo estava na frente; na segunda tentativa, com a TV acordada, a chave foi aceita. Um disparo 2 minutos depois rodou sem aviso: a autorização ficou permanente.
+- Descoberta: o Android **repreenche** `assistant` e `voice_interaction_service` com o Katniss a cada boot, então limpá-los uma vez não bastava (o `katniss:interactor` voltava, 60 MB). O `CleanJob` agora limpa os dois settings antes dos `force-stop`. A chave ADB sobreviveu à reinstalação do APK, sem novo aviso.
+- Teste do ciclo completo, sem nenhum comando no PC depois do `reboot`: o `bootclean` rodou 60, 150 e 300 s depois do boot (19:36:53, 19:38:53, 19:41:33).
+
+| Estado aos ~6 min do boot | Valor |
+|---|---|
+| Processos vivos dos que interessam | `gathin.tvhome`, `homekey`, `bootclean`, `tvrecommendations` |
+| Parados | `coreservice`, `sageservice`, `tvlauncher`, `katniss` |
+| Assistente (`assistant`) | vazio (persistiu limpo) |
+| Launcher em foco | `com.gathin.tvhome` |
+| `MemAvailable` | 1014 MB; 1139 MB mediana em 3 rodadas de `bench.sh` |
+| PSS do launcher | 22 MB |
+
+- Prime a frio medida em 961 ms nessa bateria (655 a 721 ms nas anteriores): primeira abertura depois do boot; YouTube 508 e Netflix 491 ms.
+- `packages_enabled` passou de 102 para 103 só porque o `bootclean` entrou.
+- **Efeitos que não tinha antes:** a TV agora mantém uma chave ADB autorizada para um app, e o `tvrecommendations` continua religado (algo o prende; 34 MB de PSS).
+- **Aberto:** o `scripts/post-boot.sh` virou reserva para quem não instalar o `bootclean`. O Downloader segue fora (lista do `coreservice`).
