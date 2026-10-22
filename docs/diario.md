@@ -33,3 +33,26 @@ Uma entrada por sessão: data, o que foi feito, comando, resultado, próximo pas
 - `.kl` do controle (`Vendor_0471_Product_1207.kl`) já mapeia TiVo→`DVR`, Skip→`MEDIA_SKIP_FORWARD`, Live→`NES_SHORTCUT_10`; Guide chega como `GUIDE`. Mapa em [08-controle](08-controle.md).
 - Keycode numérico do Live não aparece em `dumpsys input` nem `logcat`: fica para a fase do launcher (captura pelo remapeador).
 - **`com.nes.coreservice` consulta o status de atualização do sistema 1×/segundo** (`ClearDataForGotaFun`). `com.nes.daemon` executa limpeza de dados de app (`onRemoveCompleted`).
+
+## 2026-10-22 — Logs por minuto e dumpsys dos serviços NES/TiVo
+
+Coleta: `adb logcat -v threadtime -b all` por 180 s em repouso (buffer limpo antes), `ps -A` e `dumpsys package` dos três pacotes. Bruto em `runs/2026-10-22_1606-logs/` (fora do git).
+
+Linhas de log por minuto, por processo (top, repouso):
+
+| Processo | Linhas/min | RSS |
+|---|---|---|
+| `system_server` | 782 | 163 MB |
+| `audio.service-droidlogic` | 96 | 19 MB |
+| `com.nes.coreservice` | 61 | 49 MB |
+| `com.nes.daemon` | 2,7 | 41 MB |
+| `com.tivo.sageservice` | 4 | 88 MB |
+
+- `com.nes.coreservice`: 180 de 184 linhas em 180 s são `ClearDataForGotaFun ... getSystemUpdateStatus() status is 0`, ou seja 1 consulta/s confirmada. O `system_server` responde cada uma com `SystemUpdateManagerService: No existing info file` (180 linhas), então o custo é dobrado. Restante: negações SELinux de `search` em `sysfs/leds` (LED).
+- `com.nes.daemon` (`PERSISTENT`, uid `system`): `DaemonService check, mSkywayPid: -1`, tenta subir o `com.nes.skywayclient` (removido), chama `startService` e depois `start clear` / `onRemoveCompleted s: com.nes.skywayclient`. Ou seja, fica em laço de verificação de um pacote que não existe mais.
+- `com.tivo.sageservice`: quase mudo no log (`sagelogger [diagnostics]`: coleta de GC e estatísticas de saúde do sistema). Receiver `AutoStartBroadcastReceiver`, sem DELETE nem INSTALL. Mantém 88 MB de RSS num aparelho que não usa o serviço TiVo.
+- `com.nes.coreservice` 1.0.5.238, uid `system`, `/system/app`: pede `DELETE_PACKAGES`, `REQUEST_DELETE_PACKAGES`, `CLEAR_APP_USER_DATA`, `INSTALL_PACKAGES`, `MANAGE_USERS`. Componentes: `ClearAppDataActivity`, `NonABGotaMsgInfoReceiver`, `LedReceiver`, `BootReceiver`, `GaReceiver`, `ProviderReceiver`. Isso explica a desinstalação de launchers; o LED é outro componente, mesmo pacote.
+- `com.nes.daemon` 20230512-fit31, uid `system`, `/system/app`, `PERSISTENT`: também tem `DELETE_PACKAGES` e `CLEAR_APP_USER_DATA`.
+- Soma de RSS dos três: ~178 MB de 2 GB.
+- Nenhuma alteração feita no aparelho nesta etapa (só leitura).
+- **Próximo:** testar `pm suspend` + `appops` em `sageservice` e `daemon` (menor risco), depois `coreservice`, medindo `MemAvailable` e logs antes e depois.
