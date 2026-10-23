@@ -9,6 +9,9 @@
     "173:com.google.android.youtube.tv",
     "5124:com.global.unitviptv"
   ],
+  "app_banners": [
+    "com.global.unitviptv=banner_unitv"
+  ],
   "settings_key_keycodes": [
     172
   ],

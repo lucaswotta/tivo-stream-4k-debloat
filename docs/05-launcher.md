@@ -25,6 +25,7 @@ O protótipo próprio (`dev.lucaswotta.homelite`) foi removido do aparelho; do c
 | `personal/names-below-dock-only.patch` | personal | a dock nunca mostra o nome embaixo dos apps nem reserva faixa para ele; os apps da grade mostram o nome (`always_show_names`). Aplica depois do `instant-focus-zoom`, que altera linhas vizinhas |
 | `personal/no-glass-fill.patch` | personal | o destaque deixa de pintar o preenchimento branco translúcido e o brilho no topo sobre o tile; ficam o anel (borda) e o halo externo. Experimento: reverter apagando o arquivo |
 | `personal/top-bar-edge-to-dock.patch` | personal | na barra de cima (Wi-Fi, Configurações), seta para a esquerda no primeiro botão ou para a direita no último leva o foco ao primeiro app da dock, em vez de não fazer nada |
+| `personal/res/drawable-nodpi/banner_unitv.png` | personal | banner do UniTV (708x398, 147 KB) copiado para `res/` do launcher antes do build; o tema aponta para ele em `app_banners`, e o tile mostra essa arte em vez da do app |
 
 Temas (`examples/tivo-stream-4k/`): `theme/` é o da base (dock com Netflix, Prime e YouTube; menu ao segurar OK). `theme-personal/` acrescenta `reduced_motion`, `animations: false`, `focus_overshoot: false`, `dock_title: false`, os botões do controle e o UniTV no dock. Medições dos custos de cada opção em [diário](diario.md).
 

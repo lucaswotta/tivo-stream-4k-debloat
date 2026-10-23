@@ -28,6 +28,7 @@ git -C "$SRC" clean -qfd
 PATCHES=("$ROOT"/launcher/base/*.patch); PROFILE=base
 [[ "${1:-}" == --personal ]] && { PATCHES+=("$ROOT"/launcher/personal/*.patch); PROFILE=personal; }
 for patch in "${PATCHES[@]}"; do git -C "$SRC" apply "$patch"; done
+[[ "$PROFILE" == personal ]] && cp -r "$ROOT"/launcher/personal/res/. "$SRC/launcher/app/src/main/res/"
 echo "variante: $PROFILE (${#PATCHES[@]} patches)"
 
 cd "$SRC/launcher"
