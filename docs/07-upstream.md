@@ -6,6 +6,22 @@ Nada abaixo foi publicado. São rascunhos para o dono do projeto revisar e envia
 
 Regras do upstream (`CONTRIBUTING.md` e `AGENTS.md` deles): `examples/<marca>-<modelo>/debloat.txt` no formato do `xiaomi-mi-tv-4a`; cabeçalho com modelo exato, Android e build; só pacotes usados por alguns dias; **nenhum `pm uninstall` na lista**; sem scripts de instalação na pasta; uma linha em `examples/README.md` e uma na tabela de TVs do `README.md` (com o mesmo texto); `python3 -m unittest discover -s tests` passando; não editar `PROMPT.md`, os guardas de `disable.sh` nem `.github/workflows/`.
 
+### Estado: pronto e testado localmente, **não enviado**
+
+O PR 1 está montado como um patch sobre o commit `30626a8` do cleanyourtv: [`upstream/0001-examples-add-TiVo-Stream-4K-SEI-Robotics-Amlogic-S90.patch`](upstream/). Com ele aplicado, `python3 -m unittest discover -s tests` do cleanyourtv passa (540 testes, 3 pulados).
+
+Por que ainda não foi enviado: o `CONTRIBUTING.md` deles pede "only list packages you have actually disabled and lived with for a few days". O uso aqui foi de **um dia**, em uma unidade, então o bot de revisão deles provavelmente marcaria como `hold`. Enviar antes gasta a atenção dos mantenedores. Sugestão: usar a TV por pelo menos 3 dias, anotar no README da pasta o que quebrou ou foi reativado e então enviar.
+
+Para enviar depois:
+
+```bash
+gh repo fork Gathin23/cleanyourtv --clone && cd cleanyourtv
+git checkout -b add-tivo-stream-4k
+git am ../tivo-stream-4k-debloat/docs/upstream/0001-*.patch   # se o upstream avançou: git am -3
+python3 -m unittest discover -s tests
+git push -u origin add-tivo-stream-4k && gh pr create --fill
+```
+
 ### PR 1: lista do aparelho
 
 Título: `examples: add TiVo Stream 4K (SEI Robotics, Amlogic, NES), Android TV 12`

@@ -1,0 +1,190 @@
+From 45bdd5d2990a2c2e17c1081436dd50c16813d314 Mon Sep 17 00:00:00 2001
+From: Lucas Motta <104871819+lucaswotta@users.noreply.github.com>
+Date: Thu, 22 Oct 2026 21:08:33 -0300
+Subject: [PATCH] examples: add TiVo Stream 4K (SEI Robotics, Amlogic S905Y2,
+ NES), Android TV 12
+
+Tested on one TiVo Stream 4K (build SC.1272) for one day with several reboots. pm disable-user is refused, so the list is suspended like the Nokia 8000 one; the README here has apply and undo. Documents that com.nes.coreservice uninstalls non-system apps that declare HOME and 53 listed packages at every boot.
+---
+ README.md                                 |  1 +
+ examples/README.md                        |  1 +
+ examples/tivo-stream-4k/README.md         | 56 ++++++++++++++++++++
+ examples/tivo-stream-4k/debloat.txt       | 62 +++++++++++++++++++++++
+ examples/tivo-stream-4k/theme/config.json |  7 +++
+ 5 files changed, 127 insertions(+)
+ create mode 100644 examples/tivo-stream-4k/README.md
+ create mode 100644 examples/tivo-stream-4k/debloat.txt
+ create mode 100644 examples/tivo-stream-4k/theme/config.json
+
+diff --git a/README.md b/README.md
+index 1c318c3..2183763 100644
+--- a/README.md
++++ b/README.md
+@@ -307,6 +307,7 @@ Anker Nebula, BYINTEK, Epson, Formovie, Gadnic, JMGO, Portronics, Stellamore, Wa
+ | Thomson 43RT1055 FA Series (SPPL-built, sauve, Realtek RTD2841A), India | Android TV 14 |
+ | Thomson SPPL 4K Google TV (Skyworth SW6H, MediaTek, same board as `skyworth-sw-22sa/`), India, ~1.9 GB | Android TV 14 (Google TV home) |
+ | Thomson T32RTL6000 (SCBC, Realtek; Android reports model `ATV R1`) | Android TV 9 |
++| TiVo Stream 4K (SEI Robotics IPA1104HDW, SEI400TV, Amlogic S905Y2, NES) | Android TV 12 |
+ | Tornado 65UA1400E (El Araby, Skyworth-built SW4H, MediaTek m7332), Egypt | Android TV 11 |
+ | Toshiba (Vestel Cosmos170, yeoksam, MediaTek), Spain | Android TV 11 |
+ | Toshiba Fire TV (AFTHA004, hazel) | Fire OS 7 / Android 9 |
+diff --git a/examples/README.md b/examples/README.md
+index 1d090a8..3728a56 100644
+--- a/examples/README.md
++++ b/examples/README.md
+@@ -196,6 +196,7 @@ on that firmware, grouped and commented. These are starting points: comment out
+ | `thomson-32he5800/` | Thomson 32HE5800 (TCL-built UnionTV, Realtek RT2841), Spain | Android TV 9 | TCL BI analytics, TCL app store/user center, TV Guard cleaner, Google recommendation rows; 1.4 GB low-RAM; voice, USB media players off by choice |
+ | `thomson-43rt1055/` | Thomson 43RT1055 FA Series (SPPL-built, sauve, Realtek RTD2841A), India | Android TV 14 | First SPPL list: Anoki ACR, Privacy Sandbox APEX modules, Vewd, Google recommendation rows, partner auto-installs, retail demo; 1 GB; plain tvlauncher, no setupwraith handover; keep `tv.remote.service` (the remote's mic needs it); Anoki FAST channels, Chromecast, remote updaters, Ambient, USB media player off by choice; Live TV row reopens the last input until channels are scanned; config.json sets the Realtek Live TV app; reboot-checked |
+ | `thomson-sppl-4k-sw6h/` | Thomson SPPL 4K Google TV (Skyworth SW6H, MediaTek, same board as `skyworth-sw-22sa/`), India, ~1.9 GB | Android TV 14 (Google TV home) | Skyworth recommendation rows + partner customizer, aftersale, dailymanage, ePop/Demo Now retail demos, disclaimer popups, Play auto-installs, Android ad services; Play Movies and Play Games off by choice; Assistant, Chromecast, Miracast/DLNA, Prime Video, YouTube Music kept; setupwraith owned the setup Wi-Fi (forget + re-join first); remote's Settings button is keycode 83, set in config.json (HOME_KEY_SERVICE=1); reboot-checked |
++| `tivo-stream-4k/` | TiVo Stream 4K (SEI Robotics IPA1104HDW, SEI400TV, Amlogic S905Y2, NES) | Android TV 12 | Firmware refuses every `pm disable*` and `pm hide`, so the list is suspended (README.md here); `com.nes.coreservice` uninstalls non-system apps that declare HOME and 53 listed packages at every boot, so the launcher must not declare HOME |
+ | `tornado-65ua1400e/` | Tornado 65UA1400E (El Araby, Skyworth-built SW4H, MediaTek m7332), Egypt | Android TV 11 | Same platform as the Panasonic SW4H list: Skyworth "Daily Play", ACR, Shop tab customizer, e-POP player, e-manual, QJY browser, partner auto-installs; Google feedback/partner setup, recommendation rows, calendar/print/backup leftovers; every streaming app, Assistant, Chromecast, CastPlay, USB media and the "firewall" service kept; `fusion.android.tv.demo` receives the Input key here, keep it; Home moves only once tvlauncher is disabled; vendor forces animator scale 0.6; Live TV is `com.smartdevice.livetv`; 1.7 GB |
+ | `toshiba-cosmos-android-tv/` | Toshiba (Vestel Cosmos170, yeoksam, MediaTek), Spain | Android TV 11 | First Vestel list: vestelreporter telemetry, retail demo, partner auto-installs, Google recommendation rows/feedback, Freeview Play remnants; voice, stock YouTube/YT Music, Prime Video, USB media player off by choice; OTA and Chromecast kept; 1 GB low-RAM; Live TV is `com.mediatek.wwtv.tvcenter` (`com.cltv.fast` is an OEM-disabled decoy); remote's YouTube/Prime keys are handled below Android and cannot be remapped; uk.co.freeview.* ships factory-disabled on Spain units |
+ | `thomson-t32rtl6000/` | Thomson T32RTL6000 (SCBC, Realtek; Android reports model `ATV R1`) | Android TV 9 | Same SCBC platform as `sanyo-atv-r2/`: Google recommendation rows, telemetry and feedback, SCBC consent agent, S-Channels row, partner auto-installs, Assistant, Vewd store, OEM factory/test apps, OTA kept off; tuner stack, remote/Bluetooth and FastCast (FastScreen package) must stay; system TvProvider stays empty (vendor tuner owns EPG) so launcher channel rows are dormant; 34 packages |
+diff --git a/examples/tivo-stream-4k/README.md b/examples/tivo-stream-4k/README.md
+new file mode 100644
+index 0000000..89c4451
+--- /dev/null
++++ b/examples/tivo-stream-4k/README.md
+@@ -0,0 +1,56 @@
++# TiVo Stream 4K
++
++SEI Robotics `IPA1104HDW` (SKU `RA2400`, device `SEI400TV`), Amlogic S905Y2, 2 GB RAM, Android TV 12, build `SC.1272`,
++security patch 2025-07-05, NES middleware. Tested on one real unit on 2026-10-22.
++
++## Why `tools/disable.sh` does not work here
++
++The firmware answers every `pm disable-user`, `pm disable`, `pm disable <component>` and `pm hide` with a refusal
++("This command is illegal!", or "Shell cannot change component state"), and refuses `pm uninstall --user 0` for its core
++apps. What works, per package: `pm suspend --user 0`, `cmd appops set <pkg> RUN_ANY_IN_BACKGROUND ignore` and
++`am force-stop`, all of which survive a reboot. A suspended package still receives its boot broadcasts and bindings, so
++some processes come back after every boot and need another `am force-stop`.
++
++## Apply
++
++```bash
++export TV_HOST=192.168.1.50
++L=examples/tivo-stream-4k/debloat.txt
++tools/venv/bin/python -I tools/recovery.py --save "$L"   # record the box first, like tools/disable.sh
++grep -vE '^\s*(#|$)' "$L" | awk '{print $1}' | while read -r p; do
++  echo "pm suspend --user 0 $p"
++  echo "cmd appops set $p RUN_ANY_IN_BACKGROUND ignore"
++  echo "am force-stop $p"
++done | tools/venv/bin/python -I tools/tv.py --batch
++```
++
++Do the last group (the stock launcher) only after another launcher answers the Home key, see below.
++
++## Undo
++
++```bash
++L=examples/tivo-stream-4k/debloat.txt
++grep -vE '^\s*(#|$)' "$L" | awk '{print $1}' | while read -r p; do
++  echo "pm unsuspend --user 0 $p"
++  echo "cmd appops reset --user 0 $p"
++done | tools/venv/bin/python -I tools/tv.py --batch
++```
++
++## The launcher
++
++The stock launcher declares HOME with priority 2: `set-home-activity` answers `Success` and changes nothing.
++`com.nes.coreservice` (`EvoBlackListAppsFun`) uninstalls, at every boot, every non-system app that declares
++`android.intent.category.HOME`, and a fixed list of 53 packages (alternative launchers, Downloader, Magisk, IPTV
++variants) from `array/evo_black_list_to_uninstall_pkgs` in its `resources.arsc`.
++
++What worked on this unit, across several reboots with `coreservice` running: remove the HOME category from this
++launcher's `MainActivity` intent filter (it stays listed as a Leanback launcher) and open it by component from a
++small accessibility service on the Home key. The stock launcher cannot be suspended while it owns the HOME role: move
++it first with `cmd package set-home-activity --user 0 com.android.tv.settings/.system.FallbackHome`.
++
++The remote's Assistant button is handled by Android before the accessibility key filter, so `app_keys` cannot take it.
++
++Remote buttons (`0471:1207`): TiVo `DVR` (173), Guide `GUIDE` (172), Live keycode `5124`, Skip `MEDIA_SKIP_FORWARD` (272).
++`theme/config.json` maps TiVo, Live and Guide.
++
++A fuller write-up, the patches and the measurements: https://github.com/lucaswotta/tivo-stream-4k-debloat
+diff --git a/examples/tivo-stream-4k/debloat.txt b/examples/tivo-stream-4k/debloat.txt
+new file mode 100644
+index 0000000..c2fd4b6
+--- /dev/null
++++ b/examples/tivo-stream-4k/debloat.txt
+@@ -0,0 +1,62 @@
++# TiVo Stream 4K (SEI Robotics IPA1104HDW, SKU RA2400, device SEI400TV, Amlogic S905Y2, NES middleware), 2 GB RAM
++# Android TV 12 (SDK 31), build SC.1272, 32-bit (armeabi-v7a), security patch 2025-07-05
++#
++# Apply and undo: the commands in README.md here, NOT tools/disable.sh (this firmware refuses it).
++# Everything is SUSPENDED and barred from the background, not disabled or uninstalled.
++# Comment out any line you want to keep.
++#
++# Stock launcher: com.google.android.tvlauncher (classic Android TV). HOME priority 2, so set-home-activity says
++# "Success" and changes nothing; README.md here explains how Home reaches another launcher. A streaming stick: no
++# HDMI inputs and no tuner. Suspending the stock launcher only works after it stops owning the HOME role.
++#
++# Known quirks on this firmware:
++# - Every pm disable-user, pm disable <component> and pm hide is refused ("This command is illegal!"); pm uninstall
++#   --user 0 is refused for core apps. pm suspend and appops work and survive a reboot.
++# - Port 5555 opens as soon as USB debugging is on, with a per-computer prompt; there is no separate network toggle.
++# - com.nes.coreservice runs EvoBlackListAppsFun at every start (its BootReceiver, kicked by the persistent
++#   com.nes.daemon): it uninstalls every non-system app whose activity declares android.intent.category.HOME, and a
++#   fixed list of 53 packages from array/evo_black_list_to_uninstall_pkgs (alternative launchers, Downloader,
++#   Magisk, IPTV "Magis TV" variants). Suspending it does not stop its boot receiver.
++# - A suspended package still gets its boot broadcasts: coreservice, sageservice, tvlauncher, katniss,
++#   tvrecommendations and tvbugtracker are running again after a boot. Stop them with am force-stop.
++#
++# Kept on purpose (checked with dumpsys package):
++#   com.uei.uas.tivo               UEI QuickSet: the remote switches the TV on and off
++#   com.sei.hdmi.services          HDMI-CEC
++#   com.nes.tivo.remote.pair       Bluetooth remote pairing; remote.ota updates the remote's firmware
++#   com.google.android.apps.mediashell   Chromecast (suspending it saved no memory: another component binds it)
++#   Play Store, Play Services, keyboard, TV Settings
++
++# Telemetry and feedback
++com.google.android.feedback
++com.google.android.partnersetup                 # Google RLZ partner attribution pings
++com.nes.tvbugtracker                            # NES bug tracker
++
++# App blocker and NES background services
++com.nes.coreservice                             # uninstalls launchers and sideload tools at boot; polls the update status once a second
++com.nes.daemon                                  # persistent: the system re-creates it, so suspending changes nothing visible
++com.tivo.sageservice                            # TiVo service, no use outside the US
++
++# Recommendations, partner rows and auto-installs
++com.google.android.tvrecommendations            # also switch its notification listener off: cmd notification disallow_listener
++android.autoinstalls.config.sei                 # Play auto-install of partner apps
++
++# Preloaded apps, off by choice
++com.android.printspooler
++com.google.android.marvin.talkback              # re-enable if you need the screen reader
++
++# Stock launcher and unused services (after another launcher is Home and the HOME role has moved)
++com.google.android.tvlauncher
++com.google.android.backdrop                     # ambient screensaver
++com.android.camera2                             # no camera on a stick
++com.android.gallery3d
++com.google.android.katniss                      # Assistant; also clear settings assistant and voice_interaction_service, or the system keeps it alive
++
++# Already removed by the owner before the list (pm uninstall --user 0), kept as comments so a fresh box can decide:
++# com.tivo.atom
++# com.tivo.tivoplusplayer
++# com.tivo.tvlaunchercustomization
++# com.nes.skywayclient                          # NES device manager: boot ads, silent installs, firmware check
++# com.nes.tvglobalkeyhandler                    # remote shortcut keys
++# com.utsmta.app                                # NES factory test app
++# com.google.android.play.games
+diff --git a/examples/tivo-stream-4k/theme/config.json b/examples/tivo-stream-4k/theme/config.json
+new file mode 100644
+index 0000000..dc62d5c
+--- /dev/null
++++ b/examples/tivo-stream-4k/theme/config.json
+@@ -0,0 +1,7 @@
++{
++  "dock_apps": ["com.netflix.ninja", "com.amazon.amazonvideo.livingroom", "com.google.android.youtube.tv", "com.global.unitviptv"],
++  "app_keys": ["173:com.google.android.youtube.tv", "5124:com.global.unitviptv"],
++  "settings_key_keycodes": [172],
++  "tile_menu": true,
++  "reduced_motion": true
++}
+
+base-commit: 30626a8e4714f86bf837384b109b5c73ee736917
+-- 
+2.47.3
+
