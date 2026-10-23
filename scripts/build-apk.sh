@@ -5,7 +5,9 @@
 # Uses the JDK and SDK in ~/.local/share/tivo-toolchain (override the folder with TOOLCHAIN).
 set -euo pipefail
 APP="${1:?uso: build-apk.sh <pasta>}"
-cd "$(dirname "$0")/../$APP"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT/$APP"
+[[ "$APP" == bootclean && ! -f src/dev/lucaswotta/bootclean/Profile.java ]] && "$ROOT/scripts/bootclean-profile.sh" base
 
 TOOLCHAIN="${TOOLCHAIN:-$HOME/.local/share/tivo-toolchain}"
 JAVA_HOME="$TOOLCHAIN/jdk17"

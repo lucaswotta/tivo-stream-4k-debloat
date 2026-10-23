@@ -4,7 +4,9 @@
 # Needs JDK 17 and the Android SDK in ~/.local/share/tivo-toolchain; Gradle and the AndroidX
 # libraries are downloaded by the project's own Gradle wrapper on the first run.
 #
-# Uso: scripts/build-launcher.sh      -> launcher/cleanyourtv.apk, homekey/homekey.apk e bootclean/bootclean.apk
+# Uso: scripts/build-launcher.sh              base: só o patch da categoria HOME e o perfil base do bootclean
+#      scripts/build-launcher.sh --personal   + os patches de launcher/personal/ e o perfil personal do bootclean
+# Gera launcher/cleanyourtv.apk, homekey/homekey.apk e bootclean/bootclean.apk
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -23,7 +25,10 @@ fi
 git -C "$SRC" fetch -q --depth 1 origin "$PIN"
 git -C "$SRC" checkout -q -f "$PIN"
 git -C "$SRC" clean -qfd
-for patch in "$ROOT"/launcher/*.patch; do git -C "$SRC" apply "$patch"; done
+PATCHES=("$ROOT"/launcher/base/*.patch); PROFILE=base
+[[ "${1:-}" == --personal ]] && { PATCHES+=("$ROOT"/launcher/personal/*.patch); PROFILE=personal; }
+for patch in "${PATCHES[@]}"; do git -C "$SRC" apply "$patch"; done
+echo "variante: $PROFILE (${#PATCHES[@]} patches)"
 
 cd "$SRC/launcher"
 echo "sdk.dir=$ANDROID_HOME" > local.properties
@@ -32,4 +37,5 @@ cp app/build/outputs/apk/release/app-release.apk "$ROOT/launcher/cleanyourtv.apk
 ls -l "$ROOT/launcher/cleanyourtv.apk"
 
 "$ROOT/scripts/build-apk.sh" homekey | tail -1
+"$ROOT/scripts/bootclean-profile.sh" "$PROFILE"
 "$ROOT/scripts/build-apk.sh" bootclean | tail -1

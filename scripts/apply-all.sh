@@ -8,6 +8,7 @@
 #      TV_HOST=<ip> scripts/apply-all.sh --yes        (sem perguntar)
 #      --with-owner-removals   também remove os apps listados em "Already removed by the owner"
 #      --skip-build            usa os APKs que já existem em launcher/, homekey/ e bootclean/
+# As escolhas do dono (foco sem destaque, botões do controle, Assistente trocado) ficam em scripts/personal.sh.
 source "$(dirname "$0")/_lib.sh"
 
 DRY="" YES="" OWNER="" SKIP_BUILD=""
@@ -32,16 +33,16 @@ fi
 
 cat <<'TXT'
 
-O que será feito:
+O que será feito (a base; as preferências pessoais ficam em scripts/personal.sh):
   1. Baixar JDK 17 e Android SDK (fontes oficiais, checksum conferido), se ainda não houver.
-  2. Compilar o launcher do cleanyourtv com 4 patches, o serviço da tecla Home e o bootclean.
+  2. Compilar o launcher do cleanyourtv sem a categoria HOME, o serviço da tecla Home e o bootclean.
   3. Instalar os três e ligar os serviços de acessibilidade.
-  4. Aplicar o tema (botões TiVo, Guide, Live; foco instantâneo; sem animações).
-  5. Desligar o ouvinte de notificações do tvrecommendations.
-  6. Suspender 15 pacotes (telemetria, serviços NES e TiVo, launcher antigo, Assistente de voz...), sem desinstalar.
-  7. Tirar o launcher antigo do papel HOME e suspendê-lo (por último).
+  4. Aplicar um tema simples (dock com Netflix, Prime e YouTube; menu ao segurar OK).
+  5. Desligar o ouvinte de notificações do tvrecommendations e usar o relógio do launcher como protetor de tela.
+  6. Suspender 14 pacotes (telemetria, serviços NES e TiVo, recomendações, protetor de tela original, apps sem uso), sem desinstalar.
+  7. Tirar o launcher original do papel HOME e suspendê-lo (por último).
+Não mexe no Assistente do Google, nos botões do controle nem no visual do foco.
 Efeitos que você deve aceitar:
-  - O Assistente do Google fica desligado (o botão do Assistente abre a Play Store).
   - O bootclean fica com uma chave de depuração USB autorizada para sempre e roda comandos fixos no boot.
   - O Downloader e outros 52 apps da lista de fábrica do coreservice continuam sendo removidos a cada boot.
 TXT
@@ -64,8 +65,9 @@ fi
 step "4/7 tema"
 run "$ROOT/scripts/push-theme.sh"
 
-step "5/7 ouvinte de notificações do tvrecommendations"
+step "5/7 ouvinte de notificações do tvrecommendations e protetor de tela"
 run sh_tv cmd notification disallow_listener com.google.android.tvrecommendations/com.google.android.tvrecommendations.NotificationsService
+run sh_tv "settings put secure screensaver_components com.gathin.tvhome/.ClockDream; settings put secure screensaver_default_component com.gathin.tvhome/.ClockDream; settings put secure screensaver_enabled 1"
 
 step "6/7 debloat (suspender, sem desinstalar)"
 [[ -n "$DRY" ]] && export DRY_RUN=1
@@ -84,5 +86,5 @@ if [[ -z "$DRY" ]]; then
   sleep 20
   "$ROOT/scripts/status.sh"
   echo
-  echo "Teste com o controle: Home, Guide, TiVo, Live, Assistente. Depois reinicie a TV e rode scripts/status.sh uns 6 minutos depois."
+  echo "Teste a tecla Home do controle. Depois reinicie a TV e rode scripts/status.sh uns 6 minutos depois. Preferências pessoais: scripts/personal.sh."
 fi

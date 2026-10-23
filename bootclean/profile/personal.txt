@@ -1,0 +1,7 @@
+# Added by scripts/personal.sh on top of base.txt: the owner's Assistant choice.
+# Android refills these two settings with Katniss at every boot, and while Katniss is the registered
+# Assistant the system keeps its interactor process alive. The Assistant button goes to homekey's
+# AssistActivity, which opens the Play Store.
+shell settings put secure assistant dev.lucaswotta.homekey/.AssistActivity
+shell settings put secure voice_interaction_service ''
+stop com.google.android.katniss

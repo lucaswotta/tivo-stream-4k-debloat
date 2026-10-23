@@ -4,8 +4,9 @@ TiVo Stream 4K `IPA1104HDW` (SKU `RA2400`), fabricado pela SEI Robotics, Amlogic
 
 ## Arquivos
 
-- `debloat.txt`: pacotes por grupo, com o motivo de cada um. Aplicar com `scripts/apply.sh` ou `scripts/apply-all.sh`.
-- `theme/config.json`: tema do launcher do cleanyourtv (botões do controle, foco instantâneo). Enviar com `scripts/push-theme.sh`.
+- `debloat.txt`: pacotes por grupo, com o motivo de cada um. Aplicar com `scripts/apply.sh` (grupo a grupo) ou `scripts/apply-all.sh`.
+- `theme/config.json`: tema da base do launcher do cleanyourtv (dock com Netflix, Prime e YouTube; menu ao segurar OK).
+- `theme-personal/config.json`: preferências do dono (sem animações, botões do controle, UniTV no dock). Aplicado por `scripts/personal.sh`.
 
 ## Particularidades deste firmware
 
@@ -14,7 +15,7 @@ TiVo Stream 4K `IPA1104HDW` (SKU `RA2400`), fabricado pela SEI Robotics, Amlogic
 - Porta 5555 abre assim que a Depuração USB liga, com autorização por chave; não há opção de depuração por rede separada.
 - O botão do Assistente (`ASSIST`) é tratado pelo Android antes do filtro de teclas: nenhum serviço o intercepta. O desvio é apontar o setting `assistant` para uma atividade que abre a Play Store.
 - Keycodes do controle `0471:1207`: TiVo `173` (`DVR`), Guide `172` (`GUIDE`), Live `5124`, Skip `272`, Netflix `265` (`STEM_1`), Assistente `ASSIST` (o scancode é 217 e o keycode do Android é 219, mas nenhum serviço recebeu essa tecla aqui, então o 219 não foi observado).
-- Suspender não impede o boot de religar `coreservice`, `sageservice`, `tvlauncher`, `katniss`, `tvrecommendations` e `tvbugtracker`: o `bootclean` os para.
+- Suspender não impede o boot de religar `coreservice`, `sageservice`, `tvlauncher`, `tvrecommendations`, `tvbugtracker` e, se suspenso, `katniss`: o `bootclean` os para.
 - O `coreservice` remove no boot 53 pacotes da lista de fábrica, entre eles o Downloader.
 
 ## Mantidos de propósito

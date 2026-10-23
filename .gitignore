@@ -13,3 +13,4 @@ bootclean/build/
 bootclean/*.jks
 bootclean/*.apk
 bootclean/*.idsig
+bootclean/src/dev/lucaswotta/bootclean/Profile.java

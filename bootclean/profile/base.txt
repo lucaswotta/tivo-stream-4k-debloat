@@ -1,0 +1,8 @@
+# What bootclean stops after every boot, for everyone. One entry per line:
+#   stop <package>      am force-stop <package>
+#   shell <command>     a command run as is in the shell
+stop com.nes.coreservice
+stop com.tivo.sageservice
+stop com.google.android.tvlauncher
+stop com.google.android.tvrecommendations
+stop com.nes.tvbugtracker

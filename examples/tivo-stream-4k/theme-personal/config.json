@@ -1,0 +1,20 @@
+{
+  "dock_apps": [
+    "com.netflix.ninja",
+    "com.amazon.amazonvideo.livingroom",
+    "com.google.android.youtube.tv",
+    "com.global.unitviptv"
+  ],
+  "app_keys": [
+    "173:com.google.android.youtube.tv",
+    "5124:com.global.unitviptv"
+  ],
+  "settings_key_keycodes": [
+    172
+  ],
+  "tile_menu": true,
+  "reduced_motion": true,
+  "animations": false,
+  "focus_overshoot": false,
+  "dock_title": false
+}
