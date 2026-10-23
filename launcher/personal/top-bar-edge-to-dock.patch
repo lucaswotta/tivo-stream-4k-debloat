@@ -1,0 +1,17 @@
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
+--- a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
++++ b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
+@@ -652,8 +652,11 @@
+             int firstButton = btnInputs.getVisibility() == View.VISIBLE ? R.id.btnInputs : firstTopButton().getId();
+             int leftButton = rtlMenuBar ? R.id.btnSettings : firstButton;
+             int rightButton = rtlMenuBar ? firstButton : R.id.btnSettings;
+-            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) return v.getId() == leftButton;
+-            return keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && v.getId() == rightButton;
++            // TiVo Stream 4K: at either end of the bar, the arrow goes back to the first dock tile.
++            boolean pastEnd = keyCode == KeyEvent.KEYCODE_DPAD_LEFT ? v.getId() == leftButton
++                    : keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && v.getId() == rightButton;
++            if (pastEnd) focusTile(0);
++            return pastEnd;
+         };
+         btnInputs.setOnKeyListener(pillKeys);
+         btnWifi.setOnKeyListener(pillKeys);
