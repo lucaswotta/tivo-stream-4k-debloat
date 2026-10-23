@@ -351,3 +351,13 @@ Primeira tentativa inválida: o `push-theme.sh` falhou nas três variantes por f
 - Primeiro build falhou (`exit=1`): o patch novo foi gerado contra o arquivo original e conflitava com o `instant-focus-zoom.patch`, que altera linhas vizinhas de `AppAdapter.java`. Refeito em cima do estado já com o zoom (`diff -u` entre o arquivo depois do zoom e depois da edição); `git apply --check` isolado dá "conflito" porque ele depende do zoom, e o build, que aplica na ordem alfabética, passou.
 - Capturas depois de instalar: foco no dock (YouTube) e na grade (Play Store): o app selecionado só fica maior, sem título, rótulo, borda ou halo. O brilho colorido do fundo continua (`ambient_glow`).
 - Durante o teste, o dono estava usando a TV: duas setas injetadas por mim caíram no app Send Files To TV, que ele tinha aberto, e só moveram o foco dentro dele.
+
+## 2026-10-22 — Repositório preparado para outro usuário
+
+- `scripts/setup-toolchain.sh`: baixa JDK 17 (Temurin, SHA-256 da API da Adoptium) e o Android SDK (command-line tools, SHA-1 do `repository2-3.xml` do Google; build-tools 34 e 35; platform 34), pergunta antes de aceitar as licenças. Testado do zero em pasta temporária: `exit=0`, JDK 17.0.21.
+- `scripts/apply-all.sh` (`--dry-run`, `--yes`, `--skip-build`, `--with-owner-removals`): ferramentas, build, instalação, tema, ouvinte de notificações, debloat por grupo e o launcher original por último (o papel HOME sai do `tvlauncher` antes, senão o Android recusa suspendê-lo). Ensaio (`--dry-run`) conferido contra o plano; execução real no aparelho, com compilação: `exit=0` e `scripts/status.sh` sem nenhuma linha "FALTA". O grupo "Already removed by the owner" só entra com `--with-owner-removals`, porque inclui `tvglobalkeyhandler` (botões do controle) e `skywayclient` (verificação de firmware).
+- `scripts/status.sh` (só leitura) confere o aparelho contra o estado validado.
+- Captura da tela inicial em `docs/img/home-depois.png` (foco no FX, zoom, sem borda, halo nem nomes).
+- README reescrito (o do começo ainda dizia "Fase 0, nada foi alterado"); `docs/06-benchmark.md` consolidado com todas as medições e o ruído declarado; `docs/04-debloat.md` refeito para o método real; `docs/00-hardware.md` com as hipóteses resolvidas; `examples/tivo-stream-4k/README.md`; comparação com o cleanyourtv e o free-my-tv em `docs/09-referencias.md`; rascunhos de PR e issue em `docs/07-upstream.md`.
+- Nada foi enviado aos repositórios de referência: os rascunhos esperam o dono.
+- Afirmações do README sobre os outros dois projetos que **não testei**: se o launcher do cleanyourtv sem patch e o app do free-my-tv são removidos pela lista da NES (inferido, ambos declaram HOME), e se o Nokia 8000 e o Dialog ViU se comportam como o TiVo.

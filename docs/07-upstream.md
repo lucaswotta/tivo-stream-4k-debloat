@@ -1,28 +1,41 @@
-# 07 — Contribuição para o cleanyourtv
+# 07 — Contribuição para os repositórios de referência
 
-Regras do upstream (CONTRIBUTING.md do Gathin23/cleanyourtv):
+Nada abaixo foi publicado. São rascunhos para o dono do projeto revisar e enviar com a conta dele. Abrir PR ou issue em repositório de terceiros fala em nome de quem envia.
 
-1. `examples/<marca>-<modelo>/debloat.txt` no formato do `xiaomi-mi-tv-4a`.
-2. Cabeçalho com modelo exato, versão do Android e build (`tools/tv.py --probe`).
-3. Só pacotes realmente desabilitados e usados por **alguns dias**. Anotar o que quebrou.
-4. Uma linha em `examples/README.md`.
-5. Nunca listar pacotes para desinstalar.
+## cleanyourtv (Gathin23/cleanyourtv)
 
-## Plano de PRs
+Regras do upstream (`CONTRIBUTING.md` e `AGENTS.md` deles): `examples/<marca>-<modelo>/debloat.txt` no formato do `xiaomi-mi-tv-4a`; cabeçalho com modelo exato, Android e build; só pacotes usados por alguns dias; **nenhum `pm uninstall` na lista**; sem scripts de instalação na pasta; uma linha em `examples/README.md` e uma na tabela de TVs do `README.md` (com o mesmo texto); `python3 -m unittest discover -s tests` passando; não editar `PROMPT.md`, os guardas de `disable.sh` nem `.github/workflows/`.
 
-| # | Conteúdo | Pré-requisito |
-|---|---|---|
-| PR 1 | `examples/tivo-stream-4k/` + linha no README de exemplos | Fase 5 concluída, ≥ 3 dias de uso |
-| Issue | Propor melhorias (ex.: nota de família SEI/NES ligando Nokia, Dialog e TiVo) | PR 1 aceito |
-| PR 2+ | Uma melhoria por PR, só com sinal verde na issue | Issue aprovada |
+### PR 1: lista do aparelho
 
-Fluxo:
+Título: `examples: add TiVo Stream 4K (SEI Robotics, Amlogic, NES), Android TV 12`
 
-```bash
-gh repo fork Gathin23/cleanyourtv --clone
-cd cleanyourtv && git checkout -b add-tivo-stream-4k
-mkdir -p examples/tivo-stream-4k
-cp ../tivo-stream-4k-debloat/examples/tivo-stream-4k/debloat.txt examples/tivo-stream-4k/
-# editar examples/README.md
-git commit -am "Add TiVo Stream 4K (SEI Robotics, NES)" && gh pr create
-```
+Corpo:
+
+> TiVo Stream 4K `IPA1104HDW`, build `SC.1272`, Android 12 (SDK 31). Testado em uma unidade por um dia, com vários reboots.
+>
+> Mesma família SEI/NES do Nokia Streaming Box 8000: `pm disable-user` é recusado, então a lista é suspensa (`pm suspend` mais `appops`, como em `examples/nokia-streaming-box-8000/README.md`). O `README.md` da pasta traz o apply e o undo. Nenhum `pm uninstall` na lista; os apps que o dono já tinha removido ficam como comentário.
+>
+> Mantidos de propósito: `uei.uas.tivo` (liga a TV pelo controle), `sei.hdmi.services`, `nes.tivo.remote.*`, `mediashell`.
+>
+> Tested on: TiVo Stream 4K, Android 12, `SC.1272`.
+
+Para enviar, adaptar `examples/tivo-stream-4k/debloat.txt` ao formato deles (comentar as linhas de "Already removed by the owner", tirar as variáveis `scripts/` do cabeçalho e apontar para os comandos do `README.md` da pasta) e acrescentar as linhas nas duas tabelas.
+
+### Comentário ou issue: a lista de remoção da NES
+
+Título: `NES firmware (TiVo Stream 4K, probably Nokia 8000 and Dialog ViU): com.nes.coreservice uninstalls every non-system app that declares HOME`
+
+Corpo:
+
+> On a TiVo Stream 4K (SEI/NES, Android 12), `com.nes.coreservice` runs `EvoBlackListAppsFun` at every start. It calls `AppUtil.uninstallAsUser` on every non-system app whose activity declares `android.intent.category.HOME`, and on a fixed list of 53 packages from `array/evo_black_list_to_uninstall_pkgs` in its `resources.arsc` (alternative launchers, Downloader, Magisk, IPTV "Magis TV" variants). The service starts from its `BootReceiver`, kicked by the persistent `com.nes.daemon`, even when the package is suspended or force-stopped.
+>
+> What worked: a launcher that does not declare HOME (one line out of `MainActivity`'s intent filter), opened by component from a small accessibility service on the Home key. The launcher survived 4 reboots with `coreservice` running. A package that does declare HOME was uninstalled twice at boot.
+>
+> Not tested by me on the Nokia 8000 or the Dialog ViU, and not tested with an unpatched cleanyourtv launcher; I infer from the shared middleware that they behave the same.
+>
+> Details, resource name and the log lines: https://github.com/lucaswotta/tivo-stream-4k-debloat/blob/main/docs/03-coreservice.md
+
+## free-my-tv (simbasjungles/free-my-tv)
+
+Nada para enviar. Uma nota possível, **não testada**: em aparelhos com o `com.nes.coreservice` da NES, o app declara HOME e provavelmente seria desinstalado no boot pela mesma lista. O `Adb.java` deles é a base do cliente ADB local do `bootclean`, com a licença MIT copiada em `bootclean/LICENSE-free-my-tv`.

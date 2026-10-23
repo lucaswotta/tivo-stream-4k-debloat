@@ -23,25 +23,8 @@ O TiVo não foi fabricado pela TiVo. Quem fez foi a SEI Robotics, que usa a midd
 | Nokia Streaming Box 8000 (SEI600NK4, Android TV 14) | `examples/nokia-streaming-box-8000/` | Mesmo launcher clássico com aba "Loja"; o firmware **recusou** `pm disable-user` e teve que usar `pm suspend` + `appops`. `com.nes.coreservice` foi mantido lá porque mistura LED, mensagens de OTA e um receptor de analytics |
 | Dialog ViU (SEI103DL, Android TV 9) | `examples/dialog-viu-sei103dl/` | `com.nes.blerc` (controle Bluetooth) e `com.nes.tvglobalkeyhandler` (botões do controle) são essenciais; `com.nes.skywayclient` faz anúncios de boot e instalações silenciosas |
 
-Hipóteses para confirmar no nosso aparelho:
+O que se confirmou no aparelho (build `SC.1272`):
 
-- [x] O TiVo aceita `pm disable-user` ou recusa como o Nokia? **Recusa** (build 1272): `Warning! This command is illegal!`
-- [ ] Quais `com.nes.*` existem e quais são carga estrutural?
-- [ ] O `com.nes.coreservice` do TiVo faz as mesmas coisas que o do Nokia, mais a desinstalação?
-
-## Especificações
-
-| | |
-|---|---|
-| SoC | Amlogic S905Y2, 4× Cortex-A53 a ~1,8 GHz |
-| GPU | Mali-G31 MP2 |
-| RAM | 2 GB |
-| Armazenamento | 8 GB |
-| Vídeo | 4K HDR, Dolby Vision, HDR10+ |
-| Lançamento | 2020, Android TV 9 → 10 → 12 via OTA |
-
-## Limites que não vamos tentar quebrar
-
-- **Bootloader travado**: não existe método público de desbloqueio nem ROM customizada.
-- **Android 15/16**: exigiria bootloader aberto e port de kernel e drivers Amlogic. Fora de escopo.
-- **Widevine L1**: qualquer modificação de sistema arriscaria derrubar Netflix e Prime para SD. Por isso o projeto é 100% ADB, sem tocar em partições.
+- [x] O TiVo recusa `pm disable-user`, como o Nokia: `Warning! This command is illegal!`. Funcionam `pm suspend` e `appops`, e `pm uninstall --user 0` só para apps que não são core.
+- [x] Os pacotes `com.nes.*` presentes: `coreservice`, `daemon`, `tvbugtracker`, `tivo.quickset`, `tivo.remote.ota`, `tivo.remote.pair`, mais `com.tivo.sageservice`, `com.uei.uas.tivo` e `com.sei.hdmi.services`. O pareamento do controle, o CEC e o QuickSet são carga estrutural; o resto foi suspenso.
+- [x] O `com.nes.coreservice` do TiVo faz as mesmas coisas que o do Nokia, mais a desinstalação: desinstala no boot uma lista fixa de 53 pacotes e todo app não-sistema que declare a categoria HOME. Ver [03](03-coreservice.md).

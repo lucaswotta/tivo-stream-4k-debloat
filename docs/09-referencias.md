@@ -48,8 +48,28 @@ App Android (Java, sem Gradle; `build.sh` chama aapt2, javac, d8, zipalign, apks
 - Para o problema do HOME `priority 2`, vale ler `HomeMode.java` (`homeHolder`, `set-home-activity`, `cmd role get-role-holders`) antes de testar launcher novo. Não foi testado neste aparelho.
 - Não vale copiar: o app exige TMDB/clima/cripto e `INTERNET`, contra o princípio de launcher enxuto deste projeto.
 
+## O que este projeto faz além, e o que não faz
+
+Comparação feita em 2026-10-22, sobre o que li nos dois repositórios e o que testei neste aparelho.
+
+| | cleanyourtv | free-my-tv | este repositório |
+|---|---|---|---|
+| Aparelhos | mais de 230 pastas em `examples/` | Google TV e Android TV, LG webOS, Samsung Tizen | 1 (TiVo Stream 4K, `SC.1272`) |
+| Debloat | `pm disable-user` em lote, com guardas (pacotes core, HDMI, Wi-Fi, HOME) | uma lista curta por marca, reversível por botão | `pm suspend` e `appops`, 15 pacotes, reversível por script |
+| Launcher | próprio: temas, módulos, biblioteca de apps, 10,8 mil linhas | próprio: recomendações, clima, cripto, precisa de internet | o do cleanyourtv com 4 patches |
+| Home em firmware que fixa o launcher | registra como não resolvido (Nokia 8000) | não verifiquei | resolvido neste firmware |
+| Botões do controle | `app_keys` por keycode e scancode | só TCL | + keycode 5124 do Live, + desvio do botão do Assistente |
+| Limpeza de processos no boot | não | não | `bootclean` |
+| Testes, CI, traduções | sim | sim | só os scripts de conferência (`status.sh`, `bench.sh`) |
+| Medição com ruído declarado | `bench.py`, `trace.py` | não | `docs/06-benchmark.md`, em um aparelho |
+
+Onde este repositório vai além, de forma específica: achou a lista de 53 pacotes e o gatilho de boot do `coreservice` ([03](03-coreservice.md)); trocou a Home sem declarar HOME, o que sobreviveu a 4 reboots; descobriu que o botão do Assistente nunca chega a um serviço de acessibilidade e achou o desvio ([08](08-controle.md)); e fechou o ciclo sem computador depois do boot ([10](10-bootclean.md)).
+
+Onde não chega perto: largura (um aparelho contra mais de 230), temas, módulos, biblioteca de apps, recomendações e clima, versões para LG e Samsung, testes automatizados e CI, traduções e processo de revisão. A validação é de uma unidade, um dia, sem uso longo, e depende de uma versão de firmware.
+
 ## Lacunas
 
-- Não li o `tools/tv.py` nem o `launcher/build-and-install.sh` do `cleanyourtv` linha a linha, nem os testes.
-- A lista `DEBLOAT`/`PROTECTED` do `free-my-tv` para Android 12 não foi extraída.
-- Nada aqui foi executado no TiVo.
+- Não li o `tools/tv.py`, o `launcher/build-and-install.sh` (só o início) nem os testes do `cleanyourtv` linha a linha.
+- A lista `DEBLOAT` e `PROTECTED` do `free-my-tv` para Android 12 não foi extraída.
+- Não testei o launcher do `cleanyourtv` sem o patch da categoria HOME no TiVo: a remoção pelo `coreservice` foi observada com um app próprio que declarava HOME.
+- Não testei nada disto no Nokia 8000 nem no Dialog ViU.
