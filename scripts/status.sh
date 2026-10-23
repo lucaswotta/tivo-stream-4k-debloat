@@ -29,7 +29,7 @@ SUSPENDED=(com.google.android.feedback com.google.android.partnersetup com.nes.t
   com.tivo.sageservice com.google.android.tvrecommendations android.autoinstalls.config.sei com.android.printspooler
   com.google.android.marvin.talkback com.google.android.tvlauncher com.google.android.backdrop com.android.camera2 com.android.gallery3d)
 STOPPED=(com.nes.coreservice com.tivo.sageservice com.google.android.tvlauncher com.google.android.tvrecommendations com.nes.tvbugtracker)
-if [[ -n "$PERSONAL" ]]; then SUSPENDED+=(com.google.android.katniss); STOPPED+=(com.google.android.katniss); fi
+if [[ -n "$PERSONAL" ]]; then SUSPENDED+=(com.google.android.katniss com.google.android.tts); STOPPED+=(com.google.android.katniss); fi
 
 echo "suspensos esperados (${#SUSPENDED[@]}):"
 for p in "${SUSPENDED[@]}"; do

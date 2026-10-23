@@ -56,7 +56,7 @@ Camada separada e opcional, por cima da base. Tudo aqui é gosto, nada é necess
 | Banner próprio do UniTV | `launcher/personal/res/` e `app_banners` do tema |
 | Sem animações; dock com UniTV | `examples/tivo-stream-4k/theme-personal/config.json` |
 | Botões do controle: TiVo abre o YouTube, Live o UniTV, Guide as Configurações | `app_keys` e `settings_key_keycodes` do mesmo tema |
-| Botão do Assistente abre a Play Store; Assistente do Google desligado e `katniss` suspenso | `AssistActivity` no `homekey` e perfil `personal` do `bootclean` |
+| Botão do Assistente abre a Play Store; Assistente do Google desligado, `katniss` e `tts` (voz do Google) suspensos | `AssistActivity` no `homekey` e perfil `personal` do `bootclean` |
 
 ```bash
 scripts/personal.sh --dry-run      # o plano

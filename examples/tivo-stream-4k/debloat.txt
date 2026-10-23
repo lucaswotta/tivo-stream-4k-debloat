@@ -86,6 +86,10 @@ com.android.gallery3d                           # no TV icon; photos come from t
 # Google Assistant and voice search (only scripts/personal.sh applies this group)
 # Costs the voice search and the mic button. Suspending is not enough: the system keeps the interactor alive as the
 # registered Assistant, and refills the two settings at every boot, so bootclean's personal profile clears them.
+# com.google.android.tts (text to speech) is in the group because only TalkBack and the Assistant use it; it is
+# core, so it cannot be uninstalled, only suspended. Clearing its data first frees ~190 MB of downloaded voices.
 #   undo: put com.google.android.katniss/.search.serviceapi.KatnissVoiceInteractionService back in the settings
 #   assistant and voice_interaction_service, and scripts/rollback.sh --pkg com.google.android.katniss
+#   (and --pkg com.google.android.tts)
 com.google.android.katniss
+com.google.android.tts

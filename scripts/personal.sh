@@ -25,6 +25,7 @@ if [[ -n "$UNDO" ]]; then
   KATNISS=com.google.android.katniss/.search.serviceapi.KatnissVoiceInteractionService
   step "voltar à base"
   run "$ROOT/scripts/rollback.sh" --pkg com.google.android.katniss
+  run "$ROOT/scripts/rollback.sh" --pkg com.google.android.tts
   run sh_tv settings put secure assistant "$KATNISS"
   run sh_tv settings put secure voice_interaction_service "$KATNISS"
   run "$ROOT/scripts/build-launcher.sh"
