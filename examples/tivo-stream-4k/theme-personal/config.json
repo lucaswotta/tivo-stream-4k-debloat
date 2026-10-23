@@ -16,5 +16,6 @@
   "reduced_motion": true,
   "animations": false,
   "focus_overshoot": false,
-  "dock_title": false
+  "dock_title": false,
+  "always_show_names": true
 }

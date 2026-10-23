@@ -41,7 +41,7 @@ O que será feito (a base; as preferências pessoais ficam em scripts/personal.s
   5. Desligar o ouvinte de notificações do tvrecommendations e usar o relógio do launcher como protetor de tela.
   6. Suspender 14 pacotes (telemetria, serviços NES e TiVo, recomendações, protetor de tela original, apps sem uso), sem desinstalar.
   7. Tirar o launcher original do papel HOME e suspendê-lo (por último).
-Não mexe no Assistente do Google, nos botões do controle nem no visual do foco.
+Não mexe no Assistente do Google, nos botões do controle nem no zoom do foco.
 Efeitos que você deve aceitar:
   - O bootclean fica com uma chave de depuração USB autorizada para sempre e roda comandos fixos no boot.
   - O Downloader e outros 52 apps da lista de fábrica do coreservice continuam sendo removidos a cada boot.

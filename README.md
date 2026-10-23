@@ -50,8 +50,8 @@ Camada separada e opcional, por cima da base. Tudo aqui é gosto, nada é necess
 
 | O que muda | Como |
 |---|---|
-| Foco sem borda, sem halo, sem brilho; o app selecionado só cresce 10%, na hora | 3 patches no launcher (`launcher/personal/`) |
-| Sem o nome do app embaixo do tile nem o título grande acima do dock | patch `no-app-name` e `dock_title: false` |
+| O app selecionado cresce 10%, na hora, com o anel seletor de fábrica | patch `instant-focus-zoom` (`launcher/personal/`) |
+| Nome embaixo de cada app, sem o título grande acima do dock | `always_show_names` e `dock_title: false` |
 | Sem animações; dock com UniTV | `examples/tivo-stream-4k/theme-personal/config.json` |
 | Botões do controle: TiVo abre o YouTube, Live o UniTV, Guide as Configurações | `app_keys` e `settings_key_keycodes` do mesmo tema |
 | Botão do Assistente abre a Play Store; Assistente do Google desligado e `katniss` suspenso | `AssistActivity` no `homekey` e perfil `personal` do `bootclean` |

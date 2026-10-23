@@ -7,7 +7,7 @@
 #   - Google Assistant and voice search off (the Assistant button goes to a screen that opens the Play Store)
 #
 # Uso: TV_HOST=<ip> scripts/personal.sh [--dry-run] [--yes]
-#      TV_HOST=<ip> scripts/personal.sh --undo     (volta à base: Assistente, visual do foco e tema simples)
+#      TV_HOST=<ip> scripts/personal.sh --undo     (volta à base: Assistente, zoom do foco e tema simples)
 source "$(dirname "$0")/_lib.sh"
 
 DRY="" YES="" UNDO=""
@@ -36,9 +36,9 @@ fi
 
 cat <<'TXT'
 
-Preferências pessoais (recompila o launcher com mais 3 patches e o bootclean com o perfil personal):
-  1. Foco sem borda, halo nem brilho; o app selecionado só cresce 10%, na hora; sem nomes embaixo dos apps.
-  2. Tema: sem animações, sem o título grande acima do dock, UniTV no dock.
+Preferências pessoais (recompila o launcher com mais 1 patch e o bootclean com o perfil personal):
+  1. Foco com o anel seletor de fábrica; o app selecionado cresce 10%, na hora.
+  2. Tema: sem animações, nomes embaixo dos apps, sem o título grande acima do dock, UniTV no dock.
   3. Botões do controle: TiVo abre o YouTube, Live abre o UniTV, Guide abre as Configurações.
   4. Assistente do Google desligado: o botão do Assistente abre a Play Store e o Katniss é suspenso.
 Para voltar à base: scripts/personal.sh --undo.
