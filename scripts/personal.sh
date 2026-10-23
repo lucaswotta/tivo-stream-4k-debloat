@@ -38,7 +38,7 @@ cat <<'TXT'
 
 Preferências pessoais (recompila o launcher com mais 4 patches e o bootclean com o perfil personal):
   1. Foco com o anel seletor de fábrica; o app selecionado cresce 10%, na hora.
-  2. Tema: sem animações, título grande acima do dock, nomes só nos apps da grade (a dock fica sem texto embaixo), UniTV no dock.
+  2. Tema: sem animações, título grande acima do dock, nome embaixo só do app da grade em foco (a dock fica sem texto embaixo), UniTV no dock.
   3. Botões do controle: TiVo abre o YouTube, Live abre o UniTV, Guide abre as Configurações.
   4. Assistente do Google desligado: o botão do Assistente abre a Play Store e o Katniss é suspenso.
 Para voltar à base: scripts/personal.sh --undo.

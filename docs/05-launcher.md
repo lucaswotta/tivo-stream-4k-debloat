@@ -22,7 +22,7 @@ O protótipo próprio (`dev.lucaswotta.homelite`) foi removido do aparelho; do c
 |---|---|---|
 | `base/home-category.patch` | base | tira a categoria HOME do `MainActivity` (o `coreservice` apaga apps não-sistema que a declaram) |
 | `personal/instant-focus-zoom.patch` | personal | com `animations: false` o app selecionado ainda cresce 10%, mas na hora (o código original zerava o zoom junto com as animações); o contorno acompanha o tamanho |
-| `personal/names-below-dock-only.patch` | personal | a dock nunca mostra o nome embaixo dos apps nem reserva faixa para ele; os apps da grade mostram o nome (`always_show_names`). Aplica depois do `instant-focus-zoom`, que altera linhas vizinhas |
+| `personal/names-below-dock-only.patch` | personal | a dock nunca mostra o nome embaixo dos apps nem reserva faixa para ele; o app da grade em foco mostra o nome e os demais não (`always_show_names` desligado). Aplica depois do `instant-focus-zoom`, que altera linhas vizinhas |
 | `personal/no-glass-fill.patch` | personal | o destaque deixa de pintar o preenchimento branco translúcido e o brilho no topo sobre o tile; ficam o anel (borda) e o halo externo. Experimento: reverter apagando o arquivo |
 | `personal/top-bar-edge-to-dock.patch` | personal | na barra de cima (Wi-Fi, Configurações), seta para a esquerda no primeiro botão ou para a direita no último leva o foco ao primeiro app da dock, em vez de não fazer nada |
 | `personal/res/drawable-nodpi/banner_unitv.png` | personal | banner do UniTV (708x398, 147 KB) copiado para `res/` do launcher antes do build; o tema aponta para ele em `app_banners`, e o tile mostra essa arte em vez da do app |
