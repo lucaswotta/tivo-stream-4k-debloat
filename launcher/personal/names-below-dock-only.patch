@@ -1,0 +1,26 @@
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java b/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java
+--- a/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java
++++ b/launcher/app/src/main/java/com/gathin/tvhome/AppAdapter.java
+@@ -424,8 +424,8 @@
+         h.card.setVisibility(View.VISIBLE);
+         h.card.setFocusable(true);
+         h.name.setText(e.name);
+-        // The dock has no labels, unless always_show_names asks for them (DockDecoration then makes room in the band).
+-        h.name.setVisibility(dockRow && position < dockSize && restNameAlpha == 0f ? View.INVISIBLE : View.VISIBLE);
++        // TiVo Stream 4K: the dock never shows labels; the tiles below it show theirs (always_show_names).
++        h.name.setVisibility(dockRow && position < dockSize ? View.INVISIBLE : View.VISIBLE);
+         boolean focused = h.card.isFocused();   // a rebind after reload() can hit the focused tile
+         h.name.setAlpha(focused ? 1f : restNameAlpha);
+         h.card.setScaleX(focused ? focusScale() : 1f);
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
+--- a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
++++ b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
+@@ -500,7 +500,7 @@
+             public void onChildViewDetachedFromWindow(@NonNull View v) {
+             }
+         });
+-        if (dockRow) grid.addItemDecoration(new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames, cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding));
++        if (dockRow) grid.addItemDecoration(new DockDecoration(COLUMNS, density, cinematic, false, cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding));
+         // Reduced motion: the tiles are simply there, with no entrance (reloadApps skips it there too).
+         if (animations && !reducedMotion) {
+             grid.setLayoutAnimation(new LayoutAnimationController(
