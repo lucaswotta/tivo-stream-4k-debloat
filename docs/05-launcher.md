@@ -23,6 +23,7 @@ O protótipo próprio (`dev.lucaswotta.homelite`) foi removido do aparelho; do c
 | `base/home-category.patch` | base | tira a categoria HOME do `MainActivity` (o `coreservice` apaga apps não-sistema que a declaram) |
 | `personal/instant-focus-zoom.patch` | personal | com `animations: false` o app selecionado ainda cresce 10%, mas na hora (o código original zerava o zoom junto com as animações); o contorno acompanha o tamanho |
 | `personal/names-below-dock-only.patch` | personal | a dock nunca mostra o nome embaixo dos apps nem reserva faixa para ele; os apps da grade mostram o nome (`always_show_names`). Aplica depois do `instant-focus-zoom`, que altera linhas vizinhas |
+| `personal/no-glass-fill.patch` | personal | o destaque deixa de pintar o preenchimento branco translúcido e o brilho no topo sobre o tile; ficam o anel (borda) e o halo externo. Experimento: reverter apagando o arquivo |
 
 Temas (`examples/tivo-stream-4k/`): `theme/` é o da base (dock com Netflix, Prime e YouTube; menu ao segurar OK). `theme-personal/` acrescenta `reduced_motion`, `animations: false`, `focus_overshoot: false`, `dock_title: false`, os botões do controle e o UniTV no dock. Medições dos custos de cada opção em [diário](diario.md).
 
