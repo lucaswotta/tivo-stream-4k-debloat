@@ -1,4 +1,4 @@
-From 45bdd5d2990a2c2e17c1081436dd50c16813d314 Mon Sep 17 00:00:00 2001
+From f85f7006e4921f4149af2eb29694dc0112920dc7 Mon Sep 17 00:00:00 2001
 From: Lucas Motta <104871819+lucaswotta@users.noreply.github.com>
 Date: Thu, 22 Oct 2026 21:08:33 -0300
 Subject: [PATCH] examples: add TiVo Stream 4K (SEI Robotics, Amlogic S905Y2,
@@ -8,10 +8,10 @@ Tested on one TiVo Stream 4K (build SC.1272) for one day with several reboots. p
 ---
  README.md                                 |  1 +
  examples/README.md                        |  1 +
- examples/tivo-stream-4k/README.md         | 56 ++++++++++++++++++++
+ examples/tivo-stream-4k/README.md         | 57 +++++++++++++++++++++
  examples/tivo-stream-4k/debloat.txt       | 62 +++++++++++++++++++++++
- examples/tivo-stream-4k/theme/config.json |  7 +++
- 5 files changed, 127 insertions(+)
+ examples/tivo-stream-4k/theme/config.json |  4 ++
+ 5 files changed, 125 insertions(+)
  create mode 100644 examples/tivo-stream-4k/README.md
  create mode 100644 examples/tivo-stream-4k/debloat.txt
  create mode 100644 examples/tivo-stream-4k/theme/config.json
@@ -42,10 +42,10 @@ index 1d090a8..3728a56 100644
  | `thomson-t32rtl6000/` | Thomson T32RTL6000 (SCBC, Realtek; Android reports model `ATV R1`) | Android TV 9 | Same SCBC platform as `sanyo-atv-r2/`: Google recommendation rows, telemetry and feedback, SCBC consent agent, S-Channels row, partner auto-installs, Assistant, Vewd store, OEM factory/test apps, OTA kept off; tuner stack, remote/Bluetooth and FastCast (FastScreen package) must stay; system TvProvider stays empty (vendor tuner owns EPG) so launcher channel rows are dormant; 34 packages |
 diff --git a/examples/tivo-stream-4k/README.md b/examples/tivo-stream-4k/README.md
 new file mode 100644
-index 0000000..89c4451
+index 0000000..422f2ee
 --- /dev/null
 +++ b/examples/tivo-stream-4k/README.md
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,57 @@
 +# TiVo Stream 4K
 +
 +SEI Robotics `IPA1104HDW` (SKU `RA2400`, device `SEI400TV`), Amlogic S905Y2, 2 GB RAM, Android TV 12, build `SC.1272`,
@@ -98,8 +98,9 @@ index 0000000..89c4451
 +
 +The remote's Assistant button is handled by Android before the accessibility key filter, so `app_keys` cannot take it.
 +
-+Remote buttons (`0471:1207`): TiVo `DVR` (173), Guide `GUIDE` (172), Live keycode `5124`, Skip `MEDIA_SKIP_FORWARD` (272).
-+`theme/config.json` maps TiVo, Live and Guide.
++Remote buttons (`0471:1207`): TiVo `DVR` (173), Guide `GUIDE` (172), Live keycode `5124`, Skip `MEDIA_SKIP_FORWARD` (272). They do
++nothing on the stock firmware once `com.nes.tvglobalkeyhandler` is gone; map them with `app_keys` and
++`settings_key_keycodes` in a theme, with `HOME_KEY_SERVICE=1`. `theme/config.json` only holds the dock.
 +
 +A fuller write-up, the patches and the measurements: https://github.com/lucaswotta/tivo-stream-4k-debloat
 diff --git a/examples/tivo-stream-4k/debloat.txt b/examples/tivo-stream-4k/debloat.txt
@@ -172,16 +173,13 @@ index 0000000..c2fd4b6
 +# com.google.android.play.games
 diff --git a/examples/tivo-stream-4k/theme/config.json b/examples/tivo-stream-4k/theme/config.json
 new file mode 100644
-index 0000000..dc62d5c
+index 0000000..bb4645d
 --- /dev/null
 +++ b/examples/tivo-stream-4k/theme/config.json
-@@ -0,0 +1,7 @@
+@@ -0,0 +1,4 @@
 +{
-+  "dock_apps": ["com.netflix.ninja", "com.amazon.amazonvideo.livingroom", "com.google.android.youtube.tv", "com.global.unitviptv"],
-+  "app_keys": ["173:com.google.android.youtube.tv", "5124:com.global.unitviptv"],
-+  "settings_key_keycodes": [172],
-+  "tile_menu": true,
-+  "reduced_motion": true
++  "dock_apps": ["com.netflix.ninja", "com.amazon.amazonvideo.livingroom", "com.google.android.youtube.tv"],
++  "tile_menu": true
 +}
 
 base-commit: 30626a8e4714f86bf837384b109b5c73ee736917

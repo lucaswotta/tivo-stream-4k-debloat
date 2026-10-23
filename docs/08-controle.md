@@ -29,7 +29,7 @@ O que funciona: o sistema manda `ACTION_ASSIST` ao componente do setting `assist
 
 ## Configuração
 
-`examples/tivo-stream-4k/theme/config.json`, enviado por `scripts/push-theme.sh`:
+`examples/tivo-stream-4k/theme-personal/config.json` (preferência do dono, enviado por `scripts/personal.sh` ou `scripts/push-theme.sh <pasta>`; o tema `theme/` da base não mapeia botões):
 
 ```json
 "app_keys": ["173:com.google.android.youtube.tv", "5124:com.global.unitviptv"],

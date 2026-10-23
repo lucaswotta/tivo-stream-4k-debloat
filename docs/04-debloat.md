@@ -14,7 +14,7 @@ Por isso o `apply.sh` tenta, por pacote: `disable-user`, depois `uninstall -k --
 
 **Suspender não para o processo no boot.** O sistema ainda entrega os broadcasts de boot e mantém conexões, então `coreservice`, `sageservice`, `tvlauncher`, `katniss`, `tvrecommendations` e `tvbugtracker` voltam a rodar. Quem os para é o `bootclean` ([10](10-bootclean.md)), ou `scripts/post-boot.sh` pelo computador.
 
-## Grupos, na ordem
+## Grupos, na ordem (a base aplica 14 pacotes; com o Assistente, 15)
 
 | Grupo | Pacotes | Observação |
 |---|---|---|
@@ -22,7 +22,8 @@ Por isso o `apply.sh` tenta, por pacote: `disable-user`, depois `uninstall -k --
 | App blocker and NES services | `coreservice`, `daemon`, `sageservice` | `daemon` é persistente: suspender não o para. Ver [03](03-coreservice.md) |
 | Recommendations, partner rows | `tvrecommendations`, `autoinstalls.config.sei` | o ouvinte de notificações do `tvrecommendations` também é desligado (`cmd notification disallow_listener`) |
 | Preloaded apps | `printspooler`, `talkback` | |
-| Stock launcher and unused | `tvlauncher`, `backdrop`, `camera2`, `gallery3d`, `katniss` | só **depois** de instalar o launcher novo; o papel HOME precisa sair do `tvlauncher` antes (`set-home-activity` para a `FallbackHome` das Configurações), porque o Android recusa suspender o dono do papel HOME |
+| Stock launcher and unused | `tvlauncher`, `backdrop`, `camera2`, `gallery3d` | só **depois** de instalar o launcher novo; o papel HOME precisa sair do `tvlauncher` antes (`set-home-activity` para a `FallbackHome` das Configurações), porque o Android recusa suspender o dono do papel HOME |
+| Google Assistant and voice search | `katniss` | só no `scripts/personal.sh`: desliga a busca por voz e o botão do Assistente; exige limpar os settings do Assistente a cada boot |
 | Already removed by the owner | `tivo.atom`, `skywayclient`, `tvglobalkeyhandler`, ... | só com `apply-all.sh --with-owner-removals`; `tvglobalkeyhandler` trata os botões de atalho do controle e `skywayclient` faz a verificação de firmware |
 
 Também mexem em ajustes do sistema (não são pacotes): o Assistente (`assistant`, `voice_interaction_service`) e o protetor de tela (`screensaver_components`). O Assistente é regravado a cada boot pelo `bootclean`.

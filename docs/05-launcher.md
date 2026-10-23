@@ -10,22 +10,22 @@
 
 Escolha inicial: o launcher do cleanyourtv, porque o PR fica coerente com o projeto base. Projectivy fica como plano B.
 
-**Decisão final (2026-10-22): o launcher do cleanyourtv** (`com.gathin.tvhome` 2.6, commit `30626a8`), com um patch de uma linha (`launcher/home-category.patch`). Motivo: pedido do dono; é nativo, sem `INTERNET`, 482 KB, com fundo ambiente na cor do app focado, saudação, relógio, favoritos e menu de app. Mede 21 MB de PSS, o mesmo de um protótipo próprio de 17 KB que foi descartado por ser simples demais e ter o foco quebrado. Custo se errado: um patch a reaplicar em cada versão nova do cleanyourtv.
+**Decisão final (2026-10-22): o launcher do cleanyourtv** (`com.gathin.tvhome` 2.6, commit `30626a8`), com um patch de uma linha (`launcher/base/home-category.patch`). Motivo: pedido do dono; é nativo, sem `INTERNET`, 482 KB, com fundo ambiente na cor do app focado, saudação, relógio, favoritos e menu de app. Mede 21 MB de PSS, o mesmo de um protótipo próprio de 17 KB que foi descartado por ser simples demais e ter o foco quebrado. Custo se errado: um patch a reaplicar em cada versão nova do cleanyourtv.
 
 O protótipo próprio (`dev.lucaswotta.homelite`) foi removido do aparelho; do código dele só ficou o serviço de tecla Home, em `homekey/`.
 
 ## Patches no launcher
 
-`scripts/build-launcher.sh` aplica todos os `launcher/*.patch` ao commit fixado do `cleanyourtv`:
+`scripts/build-launcher.sh` aplica os patches de `launcher/base/` ao commit fixado do `cleanyourtv`; com `--personal`, também os de `launcher/personal/`.
 
-| Patch | O que muda |
-|---|---|
-| `home-category.patch` | tira a categoria HOME do `MainActivity` (o `coreservice` apaga apps não-sistema que a declaram) |
-| `no-app-name.patch` | o rótulo com o nome do app embaixo do tile nunca aparece (aplica depois do `instant-focus-zoom`, que altera linhas vizinhas do mesmo arquivo) |
-| `no-focus-highlight.patch` | `GlassView` (o destaque em vidro que acompanha o foco) deixa de desenhar: sem borda branca, sem os 12 anéis de brilho e sem o brilho do vidro; também deixa de pedir uma camada de hardware para ele |
-| `instant-focus-zoom.patch` | com `animations: false` o app selecionado ainda cresce 10%, mas na hora (o código original zerava o zoom junto com as animações); o contorno do destaque acompanha o tamanho |
+| Patch | Variante | O que muda |
+|---|---|---|
+| `base/home-category.patch` | base | tira a categoria HOME do `MainActivity` (o `coreservice` apaga apps não-sistema que a declaram) |
+| `personal/no-focus-highlight.patch` | personal | `GlassView` (o destaque em vidro que acompanha o foco) deixa de desenhar: sem borda branca, sem os 12 anéis de brilho e sem o brilho do vidro; também deixa de pedir uma camada de hardware |
+| `personal/instant-focus-zoom.patch` | personal | com `animations: false` o app selecionado ainda cresce 10%, mas na hora (o código original zerava o zoom junto com as animações); o contorno acompanha o tamanho |
+| `personal/no-app-name.patch` | personal | o rótulo com o nome do app embaixo do tile nunca aparece (aplica depois do `instant-focus-zoom`, que altera linhas vizinhas do mesmo arquivo) |
 
-Tema de movimento (`examples/tivo-stream-4k/theme/config.json`): `reduced_motion: true`, `animations: false`, `focus_overshoot: false`, `dock_title: false` (sem o nome grande acima do dock). O foco muda de botão sem deslizar e sem mola, e o app selecionado só cresce 10%, sem borda nem brilho. Medições dos custos de cada opção em [diário](diario.md).
+Temas (`examples/tivo-stream-4k/`): `theme/` é o da base (dock com Netflix, Prime e YouTube; menu ao segurar OK). `theme-personal/` acrescenta `reduced_motion`, `animations: false`, `focus_overshoot: false`, `dock_title: false`, os botões do controle e o UniTV no dock. Medições dos custos de cada opção em [diário](diario.md).
 
 ## Como a tecla Home chega ao launcher
 
