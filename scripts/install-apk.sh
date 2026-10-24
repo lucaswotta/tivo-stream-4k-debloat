@@ -3,10 +3,10 @@
 # job of Downloader, whose package com.nes.coreservice removes at every boot (docs/03-coreservice.md).
 # Shows the package name and version before installing; the APK is untrusted until you have checked it.
 #
-# Uso: scripts/install-apk.sh <arquivo.apk | https://...apk>
+# Usage: scripts/install-apk.sh <file.apk | https://...apk>
 source "$(dirname "$0")/_lib.sh"
 
-SOURCE="${1:?uso: install-apk.sh <arquivo.apk | https://...apk>}"
+SOURCE="${1:?usage: install-apk.sh <file.apk | https://...apk>}"
 AAPT2="${AAPT2:-$HOME/.local/share/tivo-toolchain/sdk/build-tools/34.0.0/aapt2}"
 work="$(mktemp -d)"; trap 'rm -rf "$work"' EXIT
 
@@ -16,7 +16,7 @@ if [[ "$SOURCE" == https://* ]]; then
 else
   apk="$SOURCE"
 fi
-[[ -f "$apk" ]] || { echo "arquivo não encontrado: $apk" >&2; exit 1; }
+[[ -f "$apk" ]] || { echo "file not found: $apk" >&2; exit 1; }
 
 echo "sha256: $(sha256sum "$apk" | cut -d' ' -f1)"
 [[ -x "$AAPT2" ]] && "$AAPT2" dump badging "$apk" | grep -E "^(package|application-label:)" | cut -c1-120

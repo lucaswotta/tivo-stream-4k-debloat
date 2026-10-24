@@ -1,19 +1,20 @@
 #!/usr/bin/env bash
-# Disable the packages of a debloat list, optionally one group at a time.
-# Falls back to suspend + appops when the firmware refuses pm disable-user (as on the Nokia 8000).
+# Turns off the packages of a debloat list, optionally one group at a time. Per package it tries
+# pm disable-user, then pm uninstall -k --user 0 (the APK stays in /system), then suspend + appops.
+# On build SC.1272 every package in the TiVo list is a core app, so all of them end up suspended.
 #
-# Uso:
+# Usage:
 #   scripts/apply.sh examples/tivo-stream-4k/debloat.txt
 #   scripts/apply.sh examples/tivo-stream-4k/debloat.txt --only "Telemetry"
-#   DRY_RUN=1 scripts/apply.sh ...      # só mostra o que faria
+#   DRY_RUN=1 scripts/apply.sh ...      # only prints what it would do
 source "$(dirname "$0")/_lib.sh"
 
-LIST="${1:?uso: apply.sh <lista> [--only <grupo>]}"
+LIST="${1:?usage: apply.sh <list> [--only <group>]}"
 ONLY=""
-[[ "${2:-}" == "--only" ]] && ONLY="${3:?--only precisa do nome do grupo}"
+[[ "${2:-}" == "--only" ]] && ONLY="${3:?--only needs a group name}"
 
 if head -1 "$LIST" | grep -q DRAFT && [[ -z "${FORCE_DRAFT:-}" ]]; then
-  echo "$LIST ainda é rascunho (DRAFT). Teste os lotes e tire a linha DRAFT, ou use FORCE_DRAFT=1." >&2
+  echo "$LIST is still a DRAFT. Test the groups and remove the DRAFT line, or set FORCE_DRAFT=1." >&2
   exit 1
 fi
 
@@ -23,9 +24,9 @@ LOG="$ROOT/runs/$(stamp)-apply.log"; mkdir -p "$ROOT/runs"
 
 while IFS=$'\t' read -r group pkg; do
   [[ -n "$ONLY" && "$group" != *"$ONLY"* ]] && continue
-  if ! valid_pkg "$pkg"; then echo "ignorado (nome inválido): $pkg"; continue; fi
-  if is_core "$pkg"; then echo "RECUSADO (pacote essencial do Android): $pkg"; continue; fi
-  if ! grep -qx "$pkg" <<<"$ENABLED"; then echo "pulado (não existe ou já desabilitado): $pkg"; continue; fi
+  if ! valid_pkg "$pkg"; then echo "ignored (invalid name): $pkg"; continue; fi
+  if is_core "$pkg"; then echo "REFUSED (essential Android package): $pkg"; continue; fi
+  if ! grep -qx "$pkg" <<<"$ENABLED"; then echo "skipped (missing or already disabled): $pkg"; continue; fi
 
   if [[ -n "${DRY_RUN:-}" ]]; then echo "[dry-run] $group :: $pkg"; continue; fi
 
@@ -37,7 +38,7 @@ while IFS=$'\t' read -r group pkg; do
   else
     out="$(sh_tv pm uninstall -k --user 0 "$pkg" 2>&1 || true)"
     if grep -qx 'Success' <<<"$out"; then
-      method="uninstall --user 0 (volta com install-existing)"
+      method="uninstall --user 0 (undo with install-existing)"
     else
       sh_tv pm suspend --user 0 "$pkg" >/dev/null 2>&1 || true
       sh_tv cmd appops set "$pkg" RUN_ANY_IN_BACKGROUND ignore >/dev/null 2>&1 || true
@@ -49,4 +50,4 @@ while IFS=$'\t' read -r group pkg; do
 done < <(list_packages "$LIST")
 
 echo
-echo "Feito. Teste com o controle, reinicie (adb -s $TARGET reboot) e anote em docs/diario.md."
+echo "Done. Test with the remote, then reboot (adb -s $TARGET reboot)."

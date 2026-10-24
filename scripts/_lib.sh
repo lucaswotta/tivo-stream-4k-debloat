@@ -2,8 +2,8 @@
 # Shared helpers. Source from the other scripts; needs TV_HOST (IP of the TiVo).
 set -euo pipefail
 
-: "${TV_HOST:?defina TV_HOST com o IP do TiVo, ex.: export TV_HOST=192.168.0.50}"
-command -v adb >/dev/null || { echo "adb não encontrado: instale o Android platform-tools" >&2; exit 1; }
+: "${TV_HOST:?set TV_HOST to the TiVo IP, e.g. export TV_HOST=192.168.0.50}"
+command -v adb >/dev/null || { echo "adb not found: install the Android platform-tools" >&2; exit 1; }
 
 TARGET="$TV_HOST"
 [[ "$TARGET" == *:* ]] || TARGET="$TARGET:5555"
@@ -14,7 +14,7 @@ connect() {
   local state
   state="$(adb -s "$TARGET" get-state 2>/dev/null || true)"
   if [[ "$state" != "device" ]]; then
-    echo "Sem conexão com $TARGET (estado: ${state:-nenhum}). Aceite a chave do PC na TV e tente de novo." >&2
+    echo "No connection to $TARGET (state: ${state:-none}). Accept this computer's key on the TV and try again." >&2
     exit 1
   fi
 }

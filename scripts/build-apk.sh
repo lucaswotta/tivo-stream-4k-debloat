@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Builds <folder>/<folder>.apk without Gradle: aapt2, javac, d8, zipalign, apksigner.
-# The folder holds AndroidManifest.xml, res/ and src/. Uso: scripts/build-apk.sh homekey
+# The folder holds AndroidManifest.xml, res/ and src/. Usage: scripts/build-apk.sh homekey
 # Needs JDK 17 and the Android SDK (build-tools 35.0.0, platform android-34).
 # Uses the JDK and SDK in ~/.local/share/tivo-toolchain (override the folder with TOOLCHAIN).
 set -euo pipefail
-APP="${1:?uso: build-apk.sh <pasta>}"
+APP="${1:?usage: build-apk.sh <folder>}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT/$APP"
 [[ "$APP" == bootclean && ! -f src/dev/lucaswotta/bootclean/Profile.java ]] && "$ROOT/scripts/bootclean-profile.sh" base
