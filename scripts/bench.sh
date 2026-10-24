@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Baseline / after numbers for the README table. Changes nothing except closing the measured apps.
+# Before / after numbers for docs/06-benchmark.md. Changes nothing except closing the measured apps.
 #
-# Uso: scripts/bench.sh <fase> [--boot] [--runs N]
-#   fase: rótulo livre, ex.: antes, depois, lote1
-# Com o launcher próprio, a tecla Home injetada por ADB ainda abre o original (só a tecla real passa pelo
-# serviço de acessibilidade), então: HOME_CMD='am start -n com.gathin.tvhome/.MainActivity'
-#   HOME_PKG=com.gathin.tvhome scripts/bench.sh <fase>
+# Usage: scripts/bench.sh <label> [--boot] [--runs N]
+#   label: free text, e.g. before, after, batch1
+# With the new launcher, a Home key injected over ADB still opens the stock one (only the real key goes through
+# the accessibility service), so use: HOME_CMD='am start -n com.gathin.tvhome/.MainActivity'
+#   HOME_PKG=com.gathin.tvhome scripts/bench.sh <label>
 source "$(dirname "$0")/_lib.sh"
 
-PHASE="${1:?uso: bench.sh <fase> [--boot] [--runs N]}"; shift
+PHASE="${1:?usage: bench.sh <label> [--boot] [--runs N]}"; shift
 BOOT=""; RUNS=3
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -37,16 +37,16 @@ wait_boot() {
   sleep 15
   until adb connect "$TARGET" >/dev/null 2>&1 && [[ "$(sh_tv getprop sys.boot_completed 2>/dev/null)" == 1 ]]; do
     sleep 2
-    (( SECONDS - t0 > 300 )) && { echo "a TV não voltou em 5 min" >&2; exit 1; }
+    (( SECONDS - t0 > 300 )) && { echo "the TV did not come back within 5 min" >&2; exit 1; }
   done
   echo $(( SECONDS - t0 ))
 }
 
 for r in $(seq 1 "$RUNS"); do
-  echo "Rodada $r/$RUNS"
+  echo "Run $r/$RUNS"
   if [[ -n "$BOOT" ]]; then
     rec "$r" boot_seconds "$(wait_boot)" s
-    sleep 180   # deixa os serviços de boot assentarem antes de medir memória
+    sleep 180   # let the boot services settle before measuring memory
   fi
 
   sh_tv ${HOME_CMD:-input keyevent KEYCODE_HOME}; sleep 5
@@ -71,7 +71,7 @@ for r in $(seq 1 "$RUNS"); do
 done
 
 echo
-echo "Medianas ($RUNS rodadas):"
+echo "Medians ($RUNS runs):"
 # Portable median (macOS awk has no asort): sort numerically per metric, take the middle value.
 tail -n +2 "$CSV" | cut -d, -f2 | sort -u | while read -r m; do
   vals="$(awk -F, -v m="$m" '$2==m && $3!="NA"{print $3}' "$CSV" | sort -n)"
@@ -80,4 +80,4 @@ tail -n +2 "$CSV" | cut -d, -f2 | sort -u | while read -r m; do
   unit="$(awk -F, -v m="$m" '$2==m{print $4; exit}' "$CSV")"
   printf '  %-40s %s %s\n' "$m" "$med" "$unit"
 done | tee "$OUT/summary.txt"
-echo "Dados em $OUT"
+echo "Data in $OUT"

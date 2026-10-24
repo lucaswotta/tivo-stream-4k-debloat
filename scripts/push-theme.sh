@@ -2,8 +2,8 @@
 # Send a theme's config.json to the cleanyourtv launcher (themes/README.md in that repo lists the keys) and
 # restart it so it reads the file. Restarting switches accessibility off, so the key services go back on.
 #
-# Uso: scripts/push-theme.sh [pasta-do-tema]     (padrão: examples/tivo-stream-4k/theme)
-#      scripts/push-theme.sh --reset             (remove o tema; volta ao config.xml)
+# Usage: scripts/push-theme.sh [theme-folder]    (default: examples/tivo-stream-4k/theme)
+#        scripts/push-theme.sh --reset           (removes the theme; back to config.xml)
 source "$(dirname "$0")/_lib.sh"
 
 PKG=com.gathin.tvhome
@@ -26,7 +26,7 @@ if [[ "${1:-}" == "--reset" ]]; then
 else
   theme="${1:-$ROOT/examples/tivo-stream-4k/theme}"
   python3 -I -c 'import json,sys; json.load(open(sys.argv[1]))' "$theme/config.json" \
-    || { echo "$theme/config.json não é um JSON válido" >&2; exit 1; }
+    || { echo "$theme/config.json is not valid JSON" >&2; exit 1; }
   put config.json "$theme/config.json"
 fi
 put theme_revision "$revision"; rm -f "$revision"
@@ -40,4 +40,4 @@ for _ in 1 2 3 4 5; do
   bound="$(sh_tv dumpsys accessibility | grep -A1 'Bound services' || true)"
   [[ "$bound" == *"Home Key"* ]] && break
 done
-echo "Tema aplicado. Serviços: $(grep -o 'label=[^,]*' <<<"$bound" | tr '\n' ' ')"
+echo "Theme applied. Services: $(grep -o 'label=[^,]*' <<<"$bound" | tr '\n' ' ')"

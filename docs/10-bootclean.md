@@ -1,41 +1,49 @@
-# 10 — Limpeza automática depois do boot
+# 10 — Automatic cleanup after boot
 
-`bootclean` (`dev.lucaswotta.bootclean`, 17 KB) para os processos que o sistema religa em todo boot mesmo com o pacote suspenso, sem precisar de um computador.
+[Português](pt-BR/10-bootclean.md)
 
-## O problema
+`bootclean` (`dev.lucaswotta.bootclean`, 17 KB) stops the processes the system restarts at every boot even though their packages are suspended, with no computer needed.
 
-`pm suspend`, `appops` e `killBackgroundProcesses` (chamado por um app) não impedem o boot de religar `com.nes.coreservice`, `com.tivo.sageservice`, `com.google.android.tvlauncher`, `com.google.android.tvrecommendations` e `com.nes.tvbugtracker` (perfil base), mais `com.google.android.katniss` no perfil personal. Só `am force-stop` pelo shell os derruba, e o shell só existe no ADB. Esta build não tem permissão de início automático (`AUTO_START` e semelhantes não existem em `cmd appops`).
+## The problem
 
-## O que ele faz
+`pm suspend`, `appops` and `killBackgroundProcesses` called from an app do not stop the boot from restarting `com.nes.coreservice`, `com.tivo.sageservice`, `com.google.android.tvlauncher`, `com.google.android.tvrecommendations` and `com.nes.tvbugtracker`, plus `com.google.android.katniss` with the personal layer. Only `am force-stop` from the shell takes them down, and the shell is only reachable through ADB. This build has no auto-start permission (`AUTO_START` and similar do not exist in `cmd appops`).
 
-1. `BootReceiver` recebe `BOOT_COMPLETED` e agenda quatro execuções (`JobScheduler`): na hora, e 60, 150 e 300 s depois, para os serviços que sobem tarde. A primeira roda com ~48 s de uptime, o instante em que a TV termina de ligar; antes disso o app nem existe, então a remoção de apps pela lista do `coreservice` (primeiros ~35 s) não é evitável.
-2. `CleanJob` conecta ao `adbd` da própria TV em `127.0.0.1:5555`, autentica com uma chave RSA própria e roda comandos fixos: grava `assistant` apontando para `dev.lucaswotta.homekey/.AssistActivity` (o botão do Assistente abre a Play Store, ver [08](08-controle.md)) e esvazia `voice_interaction_service` (o Android os preenche com o Katniss a cada boot, e enquanto ele é o Assistente registrado o sistema mantém o processo `katniss:interactor` vivo) e dá `am force-stop` nos pacotes do perfil.
-3. O cliente ADB (`Adb.java`) é adaptado do `free-my-tv` (MIT, licença em `bootclean/LICENSE-free-my-tv`).
+## What it does
 
-## O `tvrecommendations`
+1. `BootReceiver` gets `BOOT_COMPLETED` and schedules four runs with `JobScheduler`: right away and 60, 150 and 300 s later, for services that start late. The first one runs at ~48 s of uptime, when the TV finishes starting.
+2. `CleanJob` connects to the TV's own `adbd` at `127.0.0.1:5555`, authenticates with its own RSA key and runs the commands of the compiled profile.
+3. The ADB client (`Adb.java`) is adapted from free-my-tv (MIT, license in `bootclean/LICENSE-free-my-tv`).
 
-Ele subia no boot como **serviço de escuta de notificações** (`NotificationsService`): o sistema mantém uma conexão com todo ouvinte habilitado, por isso `force-stop` não adiantava. O ouvinte foi removido uma vez com `cmd notification disallow_listener com.google.android.tvrecommendations/com.google.android.tvrecommendations.NotificationsService`; `enabled_notification_listeners` ficou vazio e **sobreviveu ao reboot** (diferente do Assistente, que o Android refaz). Depois disso o processo ainda sobe no boot, agora por uma consulta ao provedor `NotificationContentProvider`, e o `bootclean` o para como aos outros. Para desfazer: `cmd notification allow_listener` com o mesmo componente.
+## Profiles
 
-## Perfis
+What the APK runs is fixed at build time from `bootclean/profile/*.txt`; `scripts/bootclean-profile.sh` generates `Profile.java`. Nothing can be added later from outside.
 
-O que o APK roda é fixado na compilação, a partir de `bootclean/profile/*.txt` (`scripts/bootclean-profile.sh` gera `Profile.java`): `base.txt` tem os cinco `force-stop` da base; `personal.txt` acrescenta o Assistente (`settings put secure assistant ...`, `voice_interaction_service` vazio e o `force-stop` do `katniss`). `scripts/build-launcher.sh --personal` compila o perfil personal; sem a opção, o base. Nada pode ser acrescentado depois, de fora.
+- `base.txt`: `force-stop` of the five base packages.
+- `personal.txt`: adds the Assistant. It writes `assistant = dev.lucaswotta.homekey/.AssistActivity` (the Assistant button opens the Play Store, see [08](08-remote.md)), empties `voice_interaction_service` and force-stops `katniss`. Android fills both settings with Katniss at every boot, and while it is the registered Assistant the system keeps the `katniss:interactor` process alive.
 
-## O que ele exige e o que custa
+`scripts/build-launcher.sh` builds the base profile; with `--personal`, the personal one.
 
-- **Permissões:** `INTERNET` (só para abrir o socket em `127.0.0.1`; o código não abre outro endereço) e `RECEIVE_BOOT_COMPLETED`. Ficou em APK separado do `homekey` (serviço de acessibilidade que vê todas as teclas, sem permissões) justamente para não juntar acesso à rede com leitura de teclas num pacote só.
-- **Depuração USB sempre ligada**, como já está.
-- **Chave ADB autorizada de forma permanente.** Na primeira execução a TV pergunta "Permitir depuração USB?": marque "Sempre permitir". O aviso é negado sozinho se o protetor de tela estiver na frente; rode com a TV acordada.
-- **Comandos:** só os que estão em `CleanJob.java`; nada vem de fora. O receptor é exportado e aceita a ação `dev.lucaswotta.bootclean.RUN`, que apenas agenda a mesma limpeza.
-- **Não impede** a remoção de apps pela lista do `coreservice` ([03](03-coreservice.md)), que acontece nos primeiros ~35 s do boot, antes da primeira execução.
+## `tvrecommendations`
 
-## Desfazer
+It started at boot as a notification listener (`NotificationsService`). The system keeps a binding to every enabled listener, so `force-stop` did not help. `apply-all.sh` removes the listener with `cmd notification disallow_listener com.google.android.tvrecommendations/com.google.android.tvrecommendations.NotificationsService`; `enabled_notification_listeners` stays empty across reboots, unlike the Assistant. The process still starts at boot, through a query to `NotificationContentProvider`, and `bootclean` stops it like the others. To undo: `cmd notification allow_listener` with the same component.
+
+## What it needs and what it costs
+
+- Permissions: `INTERNET` (only for the socket on `127.0.0.1`; the code opens no other address) and `RECEIVE_BOOT_COMPLETED`. It is a separate APK from `homekey`, which sees every key and has no permissions, so network access and key reading never share a package.
+- USB debugging always on.
+- An ADB key authorized for good. On the first run the TV asks "Allow USB debugging?": tick "Always allow", with the TV awake. With the screensaver in front, the prompt is denied by itself.
+- Commands: only those of the compiled profile. The receiver is exported and accepts the `dev.lucaswotta.bootclean.RUN` action, which only schedules the same cleanup.
+- It does not prevent the app removals by `coreservice`'s list ([03](03-coreservice.md)), which happen in the first ~35 s of boot, before `bootclean` exists.
+
+## Undo
 
 ```bash
-scripts/install-launcher.sh --remove    # desinstala também o bootclean
+scripts/personal.sh --undo              # if the personal layer is applied: gives the Assistant back and rebuilds with the base profile
+scripts/install-launcher.sh --remove    # uninstalls launcher, homekey and bootclean
 ```
 
-e, na TV, Opções do desenvolvedor > Revogar autorizações de depuração USB. Para devolver o Assistente do Google: `settings put secure assistant com.google.android.katniss/.search.serviceapi.KatnissVoiceInteractionService` e o mesmo em `voice_interaction_service`, `scripts/rollback.sh --pkg com.google.android.katniss`, e tirar `katniss` da lista do `CleanJob`.
+Then, on the TV: Developer options, Revoke USB debugging authorizations.
 
-## Instalação
+## Install
 
-`scripts/build-launcher.sh` compila os três APKs; `scripts/install-launcher.sh` instala, liga os serviços de acessibilidade e dispara a primeira execução do `bootclean`.
+`scripts/build-launcher.sh` builds the three APKs; `scripts/install-launcher.sh` installs them, turns on the accessibility services and triggers the first `bootclean` run.

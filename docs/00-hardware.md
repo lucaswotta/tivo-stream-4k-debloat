@@ -1,30 +1,46 @@
-# 00 — Hardware e família do aparelho
+# 00 — Hardware and device family
 
-![Etiqueta, com HSN e MAC removidos](img/etiqueta.jpg)
+[Português](pt-BR/00-hardware.md)
 
-## O que a etiqueta diz
+![Label, with HSN and MAC removed](img/etiqueta.jpg)
 
-| Campo | Valor | Por que importa |
+## Label
+
+| Field | Value | Why it matters |
 |---|---|---|
-| Modelo | `IPA1104HDW 01 400 09T TIVO` | Identifica a revisão de hardware |
-| SKU | `RA2400` | Versão de varejo dos EUA |
-| FCC ID | `2AOVU-IPA1104HDW` | `2AOVU` é o código de concessionário da **SEI Robotics** |
-| Alimentação | 5 V ⎓ 1 A | Use uma fonte que entregue isso de verdade; USB da TV às vezes não basta e causa travadas |
-| Selos | Dolby Vision, Dolby Digital Plus, Bluetooth | |
+| Model | `IPA1104HDW 01 400 09T TIVO` | hardware revision |
+| SKU | `RA2400` | US retail version |
+| FCC ID | `2AOVU-IPA1104HDW` | `2AOVU` is SEI Robotics' grantee code |
+| Power | 5 V ⎓ 1 A | some TV USB ports do not deliver this and the stick freezes; use a power adapter |
+| Marks | Dolby Vision, Dolby Digital Plus, Bluetooth | |
 
-> Nunca publique o HSN e o MAC da etiqueta. As fotos do repositório já estão tarjadas.
+Do not publish the HSN or the MAC from the label. The photos in this repository are redacted.
 
-## A descoberta que mais ajuda: a família SEI/NES
+## Hardware, read from the device
 
-O TiVo não foi fabricado pela TiVo. Quem fez foi a SEI Robotics, que usa a middleware **NES** em vários aparelhos de operadoras. Isso significa que o TiVo tem "primos" já documentados no cleanyourtv:
+| Item | Value |
+|---|---|
+| SoC | Amlogic S905Y2, 4 ARM cores from 100 MHz to 1.8 GHz, `interactive` governor |
+| GPU | Mali-G31, OpenGL ES 3.2 |
+| Memory | 2 GB |
+| Userspace | 32-bit, `armeabi-v7a` only |
+| UI | 1920x1080 at 320 dpi |
+| Hardware decoders | H.264, H.265, VP9; no AV1 |
+| System | Android TV 12 (SDK 31), build `eSTREAM4K/SEI400TV/SEI400TV:12/SC/1272`, patch 2025-07-05 |
 
-| Aparelho | Lista no cleanyourtv | O que aprendemos com ele |
+The governor and the frequency belong to the `system` user, so ADB cannot change them, and the bootloader is locked.
+
+## The SEI/NES family
+
+The TiVo Stream 4K is made by SEI Robotics, which ships the NES middleware on devices for several operators. cleanyourtv already documents two relatives:
+
+| Device | List in cleanyourtv | What it teaches |
 |---|---|---|
-| Nokia Streaming Box 8000 (SEI600NK4, Android TV 14) | `examples/nokia-streaming-box-8000/` | Mesmo launcher clássico com aba "Loja"; o firmware **recusou** `pm disable-user` e teve que usar `pm suspend` + `appops`. `com.nes.coreservice` foi mantido lá porque mistura LED, mensagens de OTA e um receptor de analytics |
-| Dialog ViU (SEI103DL, Android TV 9) | `examples/dialog-viu-sei103dl/` | `com.nes.blerc` (controle Bluetooth) e `com.nes.tvglobalkeyhandler` (botões do controle) são essenciais; `com.nes.skywayclient` faz anúncios de boot e instalações silenciosas |
+| Nokia Streaming Box 8000 (SEI600NK4, Android TV 14) | `examples/nokia-streaming-box-8000/` | same classic launcher with a Shop tab; the firmware refuses `pm disable-user` and the list uses `pm suspend` and `appops`; `com.nes.coreservice` was kept there because it also drives the LED, OTA messages and an analytics receiver |
+| Dialog ViU (SEI103DL, Android TV 9) | `examples/dialog-viu-sei103dl/` | `com.nes.blerc` (Bluetooth remote) and `com.nes.tvglobalkeyhandler` (shortcut buttons) are essential; `com.nes.skywayclient` shows boot ads and installs apps silently |
 
-O que se confirmou no aparelho (build `SC.1272`):
+Confirmed on the TiVo, build `SC.1272`:
 
-- [x] O TiVo recusa `pm disable-user`, como o Nokia: `Warning! This command is illegal!`. Funcionam `pm suspend` e `appops`, e `pm uninstall --user 0` só para apps que não são core.
-- [x] Os pacotes `com.nes.*` presentes: `coreservice`, `daemon`, `tvbugtracker`, `tivo.quickset`, `tivo.remote.ota`, `tivo.remote.pair`, mais `com.tivo.sageservice`, `com.uei.uas.tivo` e `com.sei.hdmi.services`. O pareamento do controle, o CEC e o QuickSet são carga estrutural; o resto foi suspenso.
-- [x] O `com.nes.coreservice` do TiVo faz as mesmas coisas que o do Nokia, mais a desinstalação: desinstala no boot uma lista fixa de 53 pacotes e todo app não-sistema que declare a categoria HOME. Ver [03](03-coreservice.md).
+- `pm disable-user` is refused, as on the Nokia: `Warning! This command is illegal!`. `pm suspend` and `appops` work; `pm uninstall --user 0` works only for apps that are not core.
+- NES and TiVo packages present: `com.nes.coreservice`, `com.nes.daemon`, `com.nes.tvbugtracker`, `com.nes.tivo.quickset`, `com.nes.tivo.remote.ota`, `com.nes.tivo.remote.pair`, `com.tivo.sageservice`, `com.uei.uas.tivo` and `com.sei.hdmi.services`. Remote pairing, CEC and QuickSet stay; the rest is suspended.
+- The TiVo's `com.nes.coreservice` does what the Nokia's does and, on top of that, uninstalls at boot a fixed list of 53 packages and every non-system app that declares the HOME category. See [03](03-coreservice.md).

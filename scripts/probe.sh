@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Read-only inventory of the TiVo. Changes nothing. Output: runs/<stamp>-probe/
 #
-# Uso: TV_HOST=192.168.0.50 scripts/probe.sh
+# Usage: TV_HOST=192.168.0.50 scripts/probe.sh
 source "$(dirname "$0")/_lib.sh"
 connect
 
 OUT="$ROOT/runs/$(stamp)-probe"
 mkdir -p "$OUT"
-echo "Salvando em $OUT"
+echo "Saving to $OUT"
 
 {
   for p in ro.build.fingerprint ro.build.version.release ro.build.version.sdk \
@@ -44,13 +44,13 @@ fi
 
 cat <<EOF
 
-Resumo
+Summary
   Android:            $(sh_tv getprop ro.build.version.release)
-  Pacotes de sistema: $(wc -l < "$OUT/packages-system.txt")
-  Pacotes do usuário: $(wc -l < "$OUT/packages-user.txt")
-  Já desabilitados:   $(wc -l < "$OUT/packages-disabled.txt")
-  Pacotes NES/vendor: $(wc -l < "$OUT/packages-vendor.txt")
-  CoreService:        $(grep -qx com.nes.coreservice "$OUT/packages-system.txt" && echo presente || echo ausente)
-  Wi-Fi pertence a:   $(tr '\n' ' ' < "$OUT/wifi-owners.txt")
-  pm disable-user:    $(cat "$OUT/disable-test.txt" 2>/dev/null || echo 'não testado')
+  System packages:    $(wc -l < "$OUT/packages-system.txt")
+  User packages:      $(wc -l < "$OUT/packages-user.txt")
+  Already disabled:   $(wc -l < "$OUT/packages-disabled.txt")
+  NES/vendor:         $(wc -l < "$OUT/packages-vendor.txt")
+  CoreService:        $(grep -qx com.nes.coreservice "$OUT/packages-system.txt" && echo present || echo absent)
+  Wi-Fi owned by:     $(tr '\n' ' ' < "$OUT/wifi-owners.txt")
+  pm disable-user:    $(cat "$OUT/disable-test.txt" 2>/dev/null || echo 'not tested')
 EOF

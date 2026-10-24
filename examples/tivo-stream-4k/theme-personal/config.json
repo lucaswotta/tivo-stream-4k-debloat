@@ -3,14 +3,10 @@
     "com.netflix.ninja",
     "com.amazon.amazonvideo.livingroom",
     "com.google.android.youtube.tv",
-    "com.global.unitviptv"
+    "com.android.vending"
   ],
   "app_keys": [
-    "173:com.google.android.youtube.tv",
-    "5124:com.global.unitviptv"
-  ],
-  "app_banners": [
-    "com.global.unitviptv=banner_unitv"
+    "173:com.google.android.youtube.tv"
   ],
   "settings_key_keycodes": [
     172

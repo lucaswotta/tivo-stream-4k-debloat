@@ -1,29 +1,33 @@
 #!/usr/bin/env bash
 # The owner's own choices, on top of scripts/apply-all.sh. Nothing here is needed for the rest to work, and
 # every item is a matter of taste:
-#   - focus: no border, halo or sheen; the selected app only grows 10%, at once; no app names under the tiles
-#   - theme: no animations, no big title above the dock, dock with UniTV, short menu on hold OK
-#   - remote: TiVo opens YouTube, Live opens UniTV, Guide opens Settings, Assistant opens the Play Store
-#   - Google Assistant and voice search off (the Assistant button goes to a screen that opens the Play Store)
+#   - focus: the stock focus ring without the white fill; the selected app grows 10% at once
+#   - theme: no animations, big title above the dock, names only under the focused grid tile, short menu on hold OK
+#   - remote: TiVo opens YouTube, Guide opens Settings, Assistant opens the Play Store
+#   - Google Assistant, voice search and Google text-to-speech off
 #
-# Uso: TV_HOST=<ip> scripts/personal.sh [--dry-run] [--yes]
-#      TV_HOST=<ip> scripts/personal.sh --undo     (volta à base: Assistente, zoom do foco e tema simples)
+# PERSONAL_THEME points to another theme folder (config.json, optionally res/ with banners), so apps you do
+# not want in the repository stay outside it. Default: examples/tivo-stream-4k/theme-personal.
+#
+# Usage: TV_HOST=<ip> scripts/personal.sh [--dry-run] [--yes]
+#        TV_HOST=<ip> scripts/personal.sh --undo     (back to the base: Assistant, launcher and plain theme)
 source "$(dirname "$0")/_lib.sh"
 
 DRY="" YES="" UNDO=""
 for arg in "$@"; do
-  case "$arg" in --dry-run) DRY=1 ;; --yes) YES=1 ;; --undo) UNDO=1 ;; *) echo "opção desconhecida: $arg" >&2; exit 1 ;; esac
+  case "$arg" in --dry-run) DRY=1 ;; --yes) YES=1 ;; --undo) UNDO=1 ;; *) echo "unknown option: $arg" >&2; exit 1 ;; esac
 done
 LIST="$ROOT/examples/tivo-stream-4k/debloat.txt"
+export PERSONAL_THEME="${PERSONAL_THEME:-$ROOT/examples/tivo-stream-4k/theme-personal}"
 step() { echo; echo "== $*"; }
 run() { if [[ -n "$DRY" ]]; then echo "[dry-run] $*"; else "$@"; fi; }
 
 connect
-[[ -n "$(sh_tv pm list packages com.gathin.tvhome)" ]] || { echo "Rode scripts/apply-all.sh primeiro: o launcher ainda não está instalado." >&2; exit 1; }
+[[ -n "$(sh_tv pm list packages com.gathin.tvhome)" ]] || { echo "Run scripts/apply-all.sh first: the launcher is not installed yet." >&2; exit 1; }
 
 if [[ -n "$UNDO" ]]; then
   KATNISS=com.google.android.katniss/.search.serviceapi.KatnissVoiceInteractionService
-  step "voltar à base"
+  step "back to the base"
   run "$ROOT/scripts/rollback.sh" --pkg com.google.android.katniss
   run "$ROOT/scripts/rollback.sh" --pkg com.google.android.tts
   run sh_tv settings put secure assistant "$KATNISS"
@@ -35,32 +39,33 @@ if [[ -n "$UNDO" ]]; then
   exit 0
 fi
 
-cat <<'TXT'
+cat <<TXT
 
-Preferências pessoais (recompila o launcher com mais 4 patches e o bootclean com o perfil personal):
-  1. Foco com o anel seletor de fábrica; o app selecionado cresce 10%, na hora.
-  2. Tema: sem animações, título grande acima do dock, nome embaixo só do app da grade em foco (a dock fica sem texto embaixo), UniTV no dock.
-  3. Botões do controle: TiVo abre o YouTube, Live abre o UniTV, Guide abre as Configurações.
-  4. Assistente do Google desligado: o botão do Assistente abre a Play Store e o Katniss é suspenso.
-Para voltar à base: scripts/personal.sh --undo.
+Personal layer (rebuilds the launcher with 4 more patches and bootclean with the personal profile):
+  1. Focus: the stock focus ring without the white fill; the selected app grows 10%, at once.
+  2. Theme from $PERSONAL_THEME:
+     no animations, big title above the dock, names only under the focused grid tile.
+  3. Remote buttons from the theme's app_keys (published theme: TiVo opens YouTube, Guide opens Settings).
+  4. Google Assistant off: the Assistant button opens the Play Store; katniss and tts are suspended.
+Back to the base: scripts/personal.sh --undo.
 TXT
-if [[ -z "$YES" && -z "$DRY" ]]; then read -r -p "Aplicar? [s/N] " a; [[ "$a" == [sSyY]* ]] || { echo "nada foi alterado"; exit 0; }; fi
+if [[ -z "$YES" && -z "$DRY" ]]; then read -r -p "Apply? [y/N] " a; [[ "$a" == [yY]* ]] || { echo "nothing was changed"; exit 0; }; fi
 
-step "1/4 compilar a variante personal"
+step "1/4 build the personal variant"
 run "$ROOT/scripts/build-launcher.sh" --personal
 
-step "2/4 instalar"
+step "2/4 install"
 if [[ -n "$DRY" ]]; then echo "[dry-run] scripts/install-launcher.sh"; else "$ROOT/scripts/install-launcher.sh"; fi
 
-step "3/4 tema pessoal e botões do controle"
-run "$ROOT/scripts/push-theme.sh" "$ROOT/examples/tivo-stream-4k/theme-personal"
+step "3/4 personal theme and remote buttons"
+run "$ROOT/scripts/push-theme.sh" "$PERSONAL_THEME"
 
-step "4/4 Assistente"
+step "4/4 Assistant"
 [[ -n "$DRY" ]] && export DRY_RUN=1
-"$ROOT/scripts/apply.sh" "$LIST" --only "Google Assistant" | grep -v '^$' | grep -v '^Feito'
+"$ROOT/scripts/apply.sh" "$LIST" --only "Google Assistant" | grep -v '^$' | grep -v '^Done'
 
 if [[ -z "$DRY" ]]; then
-  step "conferência"
+  step "check"
   sleep 20
   "$ROOT/scripts/status.sh" --personal
 fi

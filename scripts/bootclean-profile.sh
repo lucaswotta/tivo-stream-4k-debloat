@@ -2,13 +2,13 @@
 # Generates bootclean/src/dev/lucaswotta/bootclean/Profile.java from bootclean/profile/*.txt, so what the APK runs is
 # fixed at build time and nothing can be added from outside. Shell lines come first, then the force-stops.
 #
-# Uso: scripts/bootclean-profile.sh base|personal      (personal = base + personal.txt)
+# Usage: scripts/bootclean-profile.sh base|personal      (personal = base + personal.txt)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROFILE="${1:-base}"
 case "$PROFILE" in base) FILES=("$ROOT/bootclean/profile/base.txt") ;;
   personal) FILES=("$ROOT/bootclean/profile/base.txt" "$ROOT/bootclean/profile/personal.txt") ;;
-  *) echo "perfil desconhecido: $PROFILE (base ou personal)" >&2; exit 1 ;; esac
+  *) echo "unknown profile: $PROFILE (base or personal)" >&2; exit 1 ;; esac
 
 python3 -I - "$ROOT/bootclean/src/dev/lucaswotta/bootclean/Profile.java" "$PROFILE" "${FILES[@]}" <<'PY'
 import re, sys
@@ -26,7 +26,7 @@ for path in files:
         elif kind == "shell" and rest.strip():
             shell.append(rest.strip())
         else:
-            raise SystemExit(f"linha inválida em {path}: {line}")
+            raise SystemExit(f"invalid line in {path}: {line}")
 commands = shell + ["am force-stop " + p for p in stops]
 q = lambda s: '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
 src = ("package dev.lucaswotta.bootclean;\n\n"
@@ -34,5 +34,5 @@ src = ("package dev.lucaswotta.bootclean;\n\n"
        "final class Profile {\n    static final String[] COMMANDS = {\n%s\n    };\n}\n"
        % (profile, "\n".join("        " + q(c) + "," for c in commands)))
 open(out, "w", encoding="utf-8").write(src)
-print(f"Profile.java ({profile}): {len(commands)} comandos")
+print(f"Profile.java ({profile}): {len(commands)} commands")
 PY

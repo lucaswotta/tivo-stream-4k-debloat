@@ -1,25 +1,27 @@
 # TiVo Stream 4K
 
-TiVo Stream 4K `IPA1104HDW` (SKU `RA2400`), fabricado pela SEI Robotics, Amlogic S905Y2, 2 GB de RAM, Android TV 12 (SDK 31), build `eSTREAM4K/SEI400TV/SEI400TV:12/SC/1272`, patch de segurança 2025-07-05. Testado em 2026-10-22 em uma unidade, por um dia e vários reboots.
+[Português](README.pt-BR.md)
 
-## Arquivos
+TiVo Stream 4K `IPA1104HDW` (SKU `RA2400`), made by SEI Robotics, Amlogic S905Y2, 2 GB of RAM, Android TV 12 (SDK 31), build `eSTREAM4K/SEI400TV/SEI400TV:12/SC/1272`, security patch 2025-07-05. Tested on 2026-10-22 on one unit, for one day and several reboots.
 
-- `debloat.txt`: pacotes por grupo, com o motivo de cada um. Aplicar com `scripts/apply.sh` (grupo a grupo) ou `scripts/apply-all.sh`.
-- `theme/config.json`: tema da base do launcher do cleanyourtv (dock com Netflix, Prime e YouTube; menu ao segurar OK).
-- `theme-personal/config.json`: preferências do dono (sem animações, botões do controle, UniTV no dock). Aplicado por `scripts/personal.sh`.
+## Files
 
-## Particularidades deste firmware
+- `debloat.txt`: packages by group, with the reason for each. Apply with `scripts/apply-all.sh` or group by group with `scripts/apply.sh --only`.
+- `theme/config.json`: base theme for the cleanyourtv launcher (dock with Netflix, Prime Video and YouTube; menu on hold OK).
+- `theme-personal/config.json`: the owner's choices (no animations, title above the dock, Play Store in the dock, TiVo and Guide buttons). Applied by `scripts/personal.sh`.
 
-- `pm disable-user`, `pm hide` e `pm disable <componente>` são recusados. Todo pacote da lista é **suspenso** (`pm suspend` mais `appops`), nada é desinstalado pelo projeto. Desfazer: `scripts/rollback.sh`.
-- O launcher original tem a Home com prioridade 2 e não pode ser desabilitado. Um launcher instalado não o substitui por `set-home-activity` (responde `Success` e não muda nada). A Home vai para o novo por um serviço de acessibilidade (`homekey/`), e o launcher novo **não declara a categoria HOME**, porque o `com.nes.coreservice` desinstala todo app não-sistema que a declara.
-- Porta 5555 abre assim que a Depuração USB liga, com autorização por chave; não há opção de depuração por rede separada.
-- O botão do Assistente (`ASSIST`) é tratado pelo Android antes do filtro de teclas: nenhum serviço o intercepta. O desvio é apontar o setting `assistant` para uma atividade que abre a Play Store.
-- Keycodes do controle `0471:1207`: TiVo `173` (`DVR`), Guide `172` (`GUIDE`), Live `5124`, Skip `272`, Netflix `265` (`STEM_1`), Assistente `ASSIST` (o scancode é 217 e o keycode do Android é 219, mas nenhum serviço recebeu essa tecla aqui, então o 219 não foi observado).
-- Suspender não impede o boot de religar `coreservice`, `sageservice`, `tvlauncher`, `tvrecommendations`, `tvbugtracker` e, se suspenso, `katniss`: o `bootclean` os para.
-- O `coreservice` remove no boot 53 pacotes da lista de fábrica, entre eles o Downloader.
+## Firmware quirks
 
-## Mantidos de propósito
+- `pm disable-user`, `pm hide` and `pm disable <component>` are refused. Every package in the base is suspended (`pm suspend` plus `appops`). Undo: `scripts/rollback.sh`.
+- The stock launcher holds Home with priority 2 and cannot be disabled. An installed launcher does not replace it through `set-home-activity` (it answers `Success` and nothing changes). Home reaches the new launcher through an accessibility service (`homekey/`), and the new launcher does not declare the HOME category, because `com.nes.coreservice` uninstalls every non-system app that does.
+- Port 5555 opens as soon as USB debugging is on, with key authorization; there is no separate network debugging option.
+- The Assistant button (`ASSIST`) is handled by Android before the key filter: no service can intercept it. The workaround is to point the `assistant` setting to an activity that opens the Play Store.
+- Remote `0471:1207` keycodes: TiVo `173` (`DVR`), Guide `172` (`GUIDE`), Live `5124`, Skip `272`, Netflix `265` (`STEM_1`), Assistant `ASSIST` (scancode 217; Android keycode 219 was never observed, because no service receives that key).
+- Suspending does not stop the boot from restarting `coreservice`, `sageservice`, `tvlauncher`, `tvrecommendations`, `tvbugtracker` and, if suspended, `katniss`: `bootclean` stops them.
+- `coreservice` removes 53 packages from its factory list at every boot, Downloader among them.
 
-`com.uei.uas.tivo` (QuickSet: liga e desliga a TV pelo controle), `com.sei.hdmi.services` (HDMI-CEC), `com.nes.tivo.remote.pair` e `remote.ota` (controle), `com.google.android.apps.mediashell` (Chromecast), Play Store, Play Services, teclado e Configurações.
+## Kept on purpose
 
-Detalhes e medições: [docs/](../../docs/) e [docs/diario.md](../../docs/diario.md).
+`com.uei.uas.tivo` (QuickSet: TV power from the remote), `com.sei.hdmi.services` (HDMI-CEC), `com.nes.tivo.remote.pair` and `remote.ota` (remote), `com.google.android.apps.mediashell` (Chromecast), Play Store, Play Services, keyboard and Settings.
+
+Details and measurements: [docs/](../../docs/).

@@ -1,58 +1,61 @@
 # 05 — Launcher
 
-## Opções
+[Português](pt-BR/05-launcher.md)
 
-| Launcher | Prós | Contras |
+## Choice
+
+The launcher is [cleanyourtv](https://github.com/Gathin23/cleanyourtv)'s (`com.gathin.tvhome` 2.6, commit `30626a8`, MIT): native, no `INTERNET` permission, 482 KB, with a background in the color of the focused app, greeting, clock, favorites and an app menu. It uses 21 to 22 MB of PSS, against 60 to 108 MB for the stock launcher.
+
+Alternatives considered: Projectivy (ready on the Play Store, but larger and on `coreservice`'s removal list) and FLauncher (light, less maintained, also on the list). The cost of the choice is a patch to reapply on each new cleanyourtv release; `scripts/build-launcher.sh` pins the commit.
+
+## How the Home key reaches the launcher
+
+Three facts measured on this firmware:
+
+1. `cmd package set-home-activity` answers `Success` and records the HOME role, but the Home key still opens `tvlauncher`: its filter has `priority=2`, an installed app cannot go above 0, and Android picks by priority before the user's preference.
+2. `pm disable-user`, `pm disable <component>` and `uninstall --user 0` on `tvlauncher` are refused, and the TV Settings offer no Disable for it.
+3. `com.nes.coreservice` uninstalls at boot every non-system app that declares the HOME category ([03](03-coreservice.md)).
+
+Solution:
+
+- The launcher does not declare HOME. `launcher/base/home-category.patch` removes the category from the `MainActivity` `intent-filter`, which stays listed as `LEANBACK_LAUNCHER`.
+- An accessibility service in a separate APK (`homekey/`, 13 KB, no permissions, key filter only and no screen events) opens `com.gathin.tvhome/.MainActivity` when the real Home key is pressed and when the service starts at boot. Without the launcher installed, the key goes to the stock one.
+
+Limits:
+
+- A key injected over ADB (`input keyevent KEYCODE_HOME`) does not go through the service and opens `tvlauncher`; only the real remote button does.
+- `adb install -r` and `am force-stop` of the launcher turn the accessibility services off. `scripts/install-launcher.sh` and `scripts/push-theme.sh` turn them back on and check.
+- An app cannot stop other apps' processes: `killBackgroundProcesses` is accepted and ignored on this firmware. That is why `bootclean` exists ([10](10-bootclean.md)).
+
+## Build
+
+`scripts/build-launcher.sh` clones cleanyourtv at the pinned commit, applies the patches in `launcher/base/` and runs the project's Gradle with the toolchain's JDK 17 (it ignores the shell's `JAVA_HOME`, because Gradle 8.9 does not run on Java 25). It also builds `homekey/` and `bootclean/` with `scripts/build-apk.sh`, without Gradle. The `d8` in build-tools 34 crashes on the nested classes `javac` 17 writes; the build uses 35.
+
+With `--personal`, it also applies the patches in `launcher/personal/` and copies the images in `$PERSONAL_THEME/res/` into the launcher, if that folder exists.
+
+## Patches
+
+| Patch | Layer | What it changes |
 |---|---|---|
-| **cleanyourtv** (`launcher/` do repo base, ~300 KB) | Sem rede, sem serviços, feito para 1 GB de RAM; remapeia botões do controle | Precisa compilar (JDK 17 + Android SDK) |
-| **Projectivy** | Pronto na Play Store, bonito | Maior; era justamente o alvo do CoreService |
-| **FLauncher** | Open source, leve | Menos manutenção |
+| `base/home-category.patch` | base | removes the HOME category from `MainActivity` |
+| `personal/instant-focus-zoom.patch` | personal | with `animations: false`, the selected app still grows 10%, at once (upstream dropped the zoom together with the animations); the outline follows the size |
+| `personal/no-glass-fill.patch` | personal | the highlight no longer paints the white veil and sheen over the tile; the ring and the halo stay |
+| `personal/names-below-dock-only.patch` | personal | the dock never shows names nor reserves room for them; in the grid, only the focused app shows its name. Applies after `instant-focus-zoom`, which changes nearby lines |
+| `personal/top-bar-edge-to-dock.patch` | personal | in the top bar (Wi-Fi, Settings), an arrow past the first or last button moves focus to the first dock app |
 
-Escolha inicial: o launcher do cleanyourtv, porque o PR fica coerente com o projeto base. Projectivy fica como plano B.
+## Themes
 
-**Decisão final (2026-10-22): o launcher do cleanyourtv** (`com.gathin.tvhome` 2.6, commit `30626a8`), com um patch de uma linha (`launcher/base/home-category.patch`). Motivo: pedido do dono; é nativo, sem `INTERNET`, 482 KB, com fundo ambiente na cor do app focado, saudação, relógio, favoritos e menu de app. Mede 21 MB de PSS, o mesmo de um protótipo próprio de 17 KB que foi descartado por ser simples demais e ter o foco quebrado. Custo se errado: um patch a reaplicar em cada versão nova do cleanyourtv.
+In `examples/tivo-stream-4k/`, pushed by `scripts/push-theme.sh <folder>`:
 
-O protótipo próprio (`dev.lucaswotta.homelite`) foi removido do aparelho; do código dele só ficou o serviço de tecla Home, em `homekey/`.
+- `theme/`: base. Dock with Netflix, Prime Video and YouTube; menu on hold OK.
+- `theme-personal/`: personal layer. Adds `reduced_motion`, `animations: false`, `focus_overshoot: false`, `dock_title: true`, the Play Store in the dock and the remote buttons ([08](08-remote.md)).
 
-## Patches no launcher
+To use a theme kept outside the repository, point `PERSONAL_THEME` at a folder with `config.json` and, for custom banners (`app_banners`), `res/drawable-nodpi/<name>.png`. The theme keys are listed in cleanyourtv's `themes/README.md`. The cost of each theme option is in [06](06-benchmark.md).
 
-`scripts/build-launcher.sh` aplica os patches de `launcher/base/` ao commit fixado do `cleanyourtv`; com `--personal`, também os de `launcher/personal/`.
+## Verified
 
-| Patch | Variante | O que muda |
-|---|---|---|
-| `base/home-category.patch` | base | tira a categoria HOME do `MainActivity` (o `coreservice` apaga apps não-sistema que a declaram) |
-| `personal/instant-focus-zoom.patch` | personal | com `animations: false` o app selecionado ainda cresce 10%, mas na hora (o código original zerava o zoom junto com as animações); o contorno acompanha o tamanho |
-| `personal/names-below-dock-only.patch` | personal | a dock nunca mostra o nome embaixo dos apps nem reserva faixa para ele; o app da grade em foco mostra o nome e os demais não (`always_show_names` desligado). Aplica depois do `instant-focus-zoom`, que altera linhas vizinhas |
-| `personal/no-glass-fill.patch` | personal | o destaque deixa de pintar o preenchimento branco translúcido e o brilho no topo sobre o tile; ficam o anel (borda) e o halo externo. Experimento: reverter apagando o arquivo |
-| `personal/top-bar-edge-to-dock.patch` | personal | na barra de cima (Wi-Fi, Configurações), seta para a esquerda no primeiro botão ou para a direita no último leva o foco ao primeiro app da dock, em vez de não fazer nada |
-| `personal/res/drawable-nodpi/banner_unitv.png` | personal | banner do UniTV (708x398, 147 KB) copiado para `res/` do launcher antes do build; o tema aponta para ele em `app_banners`, e o tile mostra essa arte em vez da do app |
+- The real Home key opens the new launcher, including after a reboot.
+- Guide, TiVo and Live open what the theme sets, and Home goes back to the launcher after each ([08](08-remote.md)).
+- With the personal layer, the Assistant button opens the Play Store.
 
-Temas (`examples/tivo-stream-4k/`): `theme/` é o da base (dock com Netflix, Prime e YouTube; menu ao segurar OK). `theme-personal/` acrescenta `reduced_motion`, `animations: false`, `focus_overshoot: false`, `dock_title: false`, os botões do controle e o UniTV no dock. Medições dos custos de cada opção em [diário](diario.md).
-
-## Como a tecla Home chega ao launcher
-
-Três fatos medidos neste firmware (Android 12, build 1272):
-
-1. `cmd package set-home-activity` responde `Success` e registra o papel HOME e a atividade preferida, mas a tecla Home continua abrindo o `tvlauncher`: o filtro dele tem `priority=2`, um app instalado não passa de 0 e o Android escolhe pela prioridade antes da preferência do usuário.
-2. `pm disable-user`, `pm disable <componente>` e `uninstall --user 0` do `tvlauncher` são recusados, e as Configurações da TV não têm botão Desativar nele.
-3. `com.nes.coreservice` desinstala, no boot, todo app não-sistema que declara a categoria HOME ([03](03-coreservice.md)).
-
-Solução: o launcher **não declara HOME** (o patch remove a categoria do `intent-filter` da `MainActivity`; ela segue listada como `LEANBACK_LAUNCHER`). Um serviço de acessibilidade em APK separado de 13 KB e sem permissões (`homekey/`, só filtro de teclas, sem eventos de tela) abre `com.gathin.tvhome/.MainActivity` por componente quando a tecla Home real é pressionada e quando liga no boot. Sem o launcher instalado, a tecla passa para o original.
-
-- A tecla injetada por ADB (`input keyevent KEYCODE_HOME`) **não** passa pelo serviço e abre o `tvlauncher`; só vale o botão real do controle.
-- `adb install -r` apaga a habilitação do serviço: use `scripts/install-launcher.sh`, que reabilita e confere. Para compilar: `scripts/build-launcher.sh` (clona o commit fixado, aplica o patch e roda o Gradle do projeto com o JDK 17 do toolchain; ignora o `JAVA_HOME` do shell, porque o Gradle 8.9 não roda em Java 25).
-- Um app não consegue parar processos de outros: `killBackgroundProcesses` é aceito e ignorado neste firmware. Por isso `scripts/post-boot.sh` (ADB) para `coreservice`, `sageservice` e `tvlauncher` depois de cada boot. O `tvrecommendations` é religado pelo sistema em 1 s e fica de fora.
-- Armadilha de build do `homekey/` (sem Gradle): o `d8` 8.2 do build-tools 34 aborta com classes internas não estáticas ou anônimas geradas pelo `javac` 17; o serviço não usa nenhuma.
-
-## Pontos de atenção do TiVo (herdados dos primos SEI/NES)
-
-- No Nokia 8000, o `tvlauncher` tem prioridade HOME 2 e não pôde ser desabilitado: `set-home-activity` diz Success e nada muda. **Testar isso cedo**, antes de investir no resto.
-- Botões do controle (Netflix, Guide, Live, TiVo) provavelmente passam por `com.nes.tvglobalkeyhandler`. Ler os códigos com `adb shell getevent -lt` e mapear com `app_keys` no launcher.
-- Proteção de tela: se o `backdrop` sair, apontar `screensaver_components` para o relógio do launcher.
-
-## Verificação
-
-- [x] Botão Home abre o launcher novo, inclusive depois de reboot (botão real, 2026-10-22)
-- [ ] Botões Netflix / TiVo / Guide / Live fazem algo útil
-- [ ] Microfone (Assistente) funciona, se mantido
-- [ ] Wi-Fi volta sozinho depois do reboot
+Not verified: the remote's microphone with the Google Assistant.
