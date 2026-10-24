@@ -170,7 +170,7 @@ Ferramentas baixadas de fontes oficiais, com checksum conferido (Temurin 17.0.21
 Launcher próprio `dev.lucaswotta.homelite` (`launcher/`, commit `59b0e37`): grade de apps Leanback com banner, relógio e data. APK de 16,8 KB, **nenhuma permissão**, sem serviço, sem biblioteca, sem rede. Build sem Gradle (`launcher/build.sh`: `aapt2`, `javac --release 8`, `d8`, `zipalign`, `apksigner`).
 
 - Armadilha de build: o `d8` de `build-tools` 34 aborta com `NullPointerException` em classes que o `javac` 17 marca com `MethodParameters` sem nome (classe interna não estática, classe anônima, método ponte de `Comparator`). Contorno no código: classes aninhadas `static`, `TreeMap` com `Collator` no lugar de `Comparator` próprio.
-- Abre em 395 ms a frio (`am start -W`). Tela conferida por captura: 10 tiles (FX, Navegador Web, Netflix, Play Store, Prime Video, Send Files To TV, TVExpress BR, UniTV, YouTube, Configurações).
+- Abre em 395 ms a frio (`am start -W`). Tela conferida por captura: 10 tiles (os apps instalados e Configurações).
 - O Downloader (`com.esaba.downloader`) não aparece na grade: não declara `LEANBACK_LAUNCHER`, ou foi desinstalado. A conferir.
 
 **Teste de HOME (resultado negativo, igual ao Nokia 8000):**
@@ -229,7 +229,7 @@ Medição (reboot, 130 s, `post-boot.sh`, 3 rodadas de `bench.sh`, mediana):
 
 Mesmo limite de antes: a coluna da esquerda foi medida logo após o boot e a da direita alguns minutos depois, com `coreservice`, `sageservice` e `tvlauncher` parados à força. O ganho firme é de memória.
 
-**Apps que sumiram.** O dono reportou falta de apps. Pacotes de usuário antes: `tvbrowser`, `nextapp.fx`, `sendfilestotv`, `livetv.tve`, `unitviptv`, mais o Downloader instalado depois. Agora: `unitviptv`, `sendfilestotv`, `nextapp.fx`. O log mostra `tvbrowser` e `livetv.tve` removidos pelo fluxo interativo (launcher > Informações do app > `UNINSTALL_PACKAGE` do instalador de pacotes, a 11 s um do outro); o dono confirmou que apagou os dois. O Downloader consta na lista fixa do `coreservice` ([03](03-coreservice.md)) e não aparece no log do boot atual (já havia sumido); sem log do período anterior não dá para dizer se foi o dono ou o `coreservice` num dos reboots de 17:10 a 17:24, quando o `coreservice` estava sem suspensão para a comparação de benchmark. Aberto.
+**Apps que sumiram.** O dono reportou falta de apps. Pacotes de usuário antes: `tvbrowser`, `nextapp.fx`, `sendfilestotv` e dois apps de TV ao vivo, mais o Downloader instalado depois. Agora: `sendfilestotv`, `nextapp.fx` e um dos apps de TV ao vivo. O log mostra `tvbrowser` e `livetv.tve` removidos pelo fluxo interativo (launcher > Informações do app > `UNINSTALL_PACKAGE` do instalador de pacotes, a 11 s um do outro); o dono confirmou que apagou os dois. O Downloader consta na lista fixa do `coreservice` ([03](03-coreservice.md)) e não aparece no log do boot atual (já havia sumido); sem log do período anterior não dá para dizer se foi o dono ou o `coreservice` num dos reboots de 17:10 a 17:24, quando o `coreservice` estava sem suspensão para a comparação de benchmark. Aberto.
 - **Pendente:** teclas TiVo, Guide e Live; protetor de tela; Downloader (a lista de remoção do `coreservice` o inclui, então não sobrevive a reboot); `config.xml`/tema do launcher.
 
 ## 2026-10-22 — Teclas TiVo, Guide e Live
@@ -237,7 +237,7 @@ Mesmo limite de antes: a coluna da esquerda foi medida logo após o boot e a da 
 - Keycodes lidos dos botões reais com um log temporário no serviço de tecla Home (removido; o APK instalado não contém o log): TiVo 173 (`DVR`), Guide 172 (`GUIDE`), **Live 5124**, Skip 272. Tabela em [08](08-controle.md).
 - Tema `examples/tivo-stream-4k/theme/config.json` (`dock_apps`, `app_keys`, `settings_key_keycodes`, `tile_menu`, `home_idle_clock_minutes: 10`) enviado por `scripts/push-theme.sh` (`content write` pelo provedor do launcher, o arquivo fica com o dono certo, `u0_a104`). O `tile_menu: true` troca o segurar OK, que abria "Informações do app" direto, por um menu com Mover, Remover e Informações.
 - O `dumpsys accessibility` lista um serviço por linha: os scripts liam só a primeira e davam "serviço não ligou" com os dois ligados. Corrigido.
-- Teste com os botões reais: Guide abriu as Configurações, TiVo o YouTube, Live o UniTV; Home voltou ao launcher depois de cada um; sem crash.
+- Teste com os botões reais: Guide abriu as Configurações, TiVo o YouTube, Live o app de TV ao vivo do dono; Home voltou ao launcher depois de cada um; sem crash.
 - **Aberto:** Downloader; protetor de tela; ajuste fino do tema (movimento reduzido, papel de parede).
 
 ## 2026-10-22 — Protetor de tela, launcher velho suspenso e segunda leva
