@@ -45,7 +45,7 @@ Personal layer (rebuilds the launcher with 4 more patches and bootclean with the
   1. Focus: the stock focus ring without the white fill; the selected app grows 10%, at once.
   2. Theme from $PERSONAL_THEME:
      no animations, big title above the dock, names only under the focused grid tile.
-  3. Remote: TiVo opens YouTube, Guide opens Settings.
+  3. Remote buttons from the theme's app_keys (published theme: TiVo opens YouTube, Guide opens Settings).
   4. Google Assistant off: the Assistant button opens the Play Store; katniss and tts are suspended.
 Back to the base: scripts/personal.sh --undo.
 TXT
