@@ -4,9 +4,10 @@
 # Needs JDK 17 and the Android SDK in ~/.local/share/tivo-toolchain; Gradle and the AndroidX
 # libraries are downloaded by the project's own Gradle wrapper on the first run.
 #
-# Uso: scripts/build-launcher.sh              base: só o patch da categoria HOME e o perfil base do bootclean
-#      scripts/build-launcher.sh --personal   + os patches de launcher/personal/ e o perfil personal do bootclean
-# Gera launcher/cleanyourtv.apk, homekey/homekey.apk e bootclean/bootclean.apk
+# Usage: scripts/build-launcher.sh             base: only the HOME category patch and the base bootclean profile
+#        scripts/build-launcher.sh --personal  + the patches in launcher/personal/, the personal bootclean profile
+#                                              and the images in $PERSONAL_THEME/res/, if that folder exists
+# Writes launcher/cleanyourtv.apk, homekey/homekey.apk and bootclean/bootclean.apk
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -28,8 +29,13 @@ git -C "$SRC" clean -qfd
 PATCHES=("$ROOT"/launcher/base/*.patch); PROFILE=base
 [[ "${1:-}" == --personal ]] && { PATCHES+=("$ROOT"/launcher/personal/*.patch); PROFILE=personal; }
 for patch in "${PATCHES[@]}"; do git -C "$SRC" apply "$patch"; done
-[[ "$PROFILE" == personal ]] && cp -r "$ROOT"/launcher/personal/res/. "$SRC/launcher/app/src/main/res/"
-echo "variante: $PROFILE (${#PATCHES[@]} patches)"
+# Banners for the theme's app_banners live next to its config.json, so a theme kept outside the repository
+# can carry its own images.
+PERSONAL_THEME="${PERSONAL_THEME:-$ROOT/examples/tivo-stream-4k/theme-personal}"
+if [[ "$PROFILE" == personal && -d "$PERSONAL_THEME/res" ]]; then
+  cp -r "$PERSONAL_THEME/res/." "$SRC/launcher/app/src/main/res/"
+fi
+echo "variant: $PROFILE (${#PATCHES[@]} patches)"
 
 cd "$SRC/launcher"
 echo "sdk.dir=$ANDROID_HOME" > local.properties
