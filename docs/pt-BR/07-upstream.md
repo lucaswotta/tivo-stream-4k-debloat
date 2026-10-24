@@ -7,9 +7,9 @@
 | O quê | Link | Conteúdo | Estado |
 |---|---|---|---|
 | Pull request | [#1061](https://github.com/Gathin23/cleanyourtv/pull/1061) | `examples/tivo-stream-4k/` (`debloat.txt`, `README.md` com aplicar e desfazer, `theme/config.json` só com a dock) e as linhas nas tabelas de aparelhos | enviado em 2026-10-22, mergeado em 2026-10-23 |
-| Issue | [#1062](https://github.com/Gathin23/cleanyourtv/issues/1062) | o `com.nes.coreservice` desinstala no boot todo app não-sistema que declare HOME e uma lista de 53 pacotes | aberta |
+| Issue | [#1062](https://github.com/Gathin23/cleanyourtv/issues/1062) | o `com.nes.coreservice` desinstala no boot todo app não-sistema que declare HOME e uma lista de 53 pacotes | fechada como concluída em 2026-10-24 |
 
-No merge, o mantenedor comentou o grupo do launcher original no `debloat.txt` de lá, com uma nota: o launcher do cleanyourtv ainda não responde à tecla Home neste aparelho, e o README de lá manda descomentar o grupo só quando outro launcher responder. Na issue, o mantenedor pediu um PR que leve o achado às notas dos aparelhos TiVo/NES e ao README do Nokia 8000, marcado como "não testado lá". Esse PR ainda não foi feito.
+No merge, o mantenedor comentou o grupo do launcher original no `debloat.txt` de lá, com uma nota: o launcher do cleanyourtv ainda não responde à tecla Home neste aparelho, e o README de lá manda descomentar o grupo só quando outro launcher responder. Depois, o próprio mantenedor levou o achado ao README do Nokia 8000, marcado como "Not yet tested on this box" e apontando para as notas do TiVo (commit `852c2d8`, 2026-10-23), e fechou a issue.
 
 O texto enviado está em [`../upstream/pr-1061-body.md`](../upstream/pr-1061-body.md) e [`../upstream/issue-1062-body.md`](../upstream/issue-1062-body.md). O patch do PR (commit `f85f700` da branch `add-tivo-stream-4k` do fork `lucaswotta/cleanyourtv`, sobre o `30626a8` do upstream) está em [`../upstream/`](../upstream/).
 
